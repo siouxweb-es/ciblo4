@@ -1,5 +1,5 @@
 // src/pages/Page.tsx
-import { FunctionComponent, useState } from 'react'
+import { FunctionComponent, useState, useEffect } from 'react' // <-- AÑADIDO useEffect
 import {
   Box,
   Typography,
@@ -26,8 +26,8 @@ import { CreateEventDTO, Event } from '../types'
 import {
   CYBERSECURITY_TAGS,
   EVENT_LEVELS,
-  PROVINCIAL_CAPITALS,
-  AUTONOMOUS_COMMUNITIES
+  LOCATION_DATA, // <-- NUEVO: Importamos el objeto de datos
+  AUTONOMOUS_COMMUNITIES // <-- Importamos la lista de comunidades
 } from '../constants/filters'
 
 const Page: FunctionComponent = () => {
@@ -39,6 +39,7 @@ const Page: FunctionComponent = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // --- MODIFICADO: El estado se inicializa con los datos del loader si existen ---
   const [formData, setFormData] = useState<Partial<CreateEventDTO>>({
     title: loadedEvent?.title || '',
     description: loadedEvent?.description || '',
@@ -58,6 +59,16 @@ const Page: FunctionComponent = () => {
     online_url: loadedEvent?.online_url || '',
     price: loadedEvent?.price || 0
   })
+
+  // --- NUEVO: Estado para las ciudades disponibles según la comunidad ---
+  const [availableCities, setAvailableCities] = useState<string[]>([])
+
+  // --- NUEVO: Efecto para cargar las ciudades si estamos en modo edición ---
+  useEffect(() => {
+    if (isEditMode && formData.venue_community) {
+      setAvailableCities(LOCATION_DATA[formData.venue_community] || [])
+    }
+  }, [isEditMode, formData.venue_community])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target
@@ -79,10 +90,25 @@ const Page: FunctionComponent = () => {
       setFormData((prev) => ({ ...prev, [field]: value }))
     }
 
+  // --- MODIFICADO: Handler para Autocomplete ---
   const handleSingleAutocompleteChange =
     (field: 'venue_city' | 'venue_community') =>
     (event: any, value: string | null) => {
-      setFormData((prev) => ({ ...prev, [field]: value || '' }))
+      // Lógica de dependencia
+      if (field === 'venue_community') {
+        // Si cambia la comunidad...
+        const newCommunity = value || ''
+        setFormData((prev) => ({
+          ...prev,
+          venue_community: newCommunity,
+          venue_city: '' // <-- Reseteamos la ciudad
+        }))
+        // Actualizamos la lista de ciudades disponibles
+        setAvailableCities(newCommunity ? LOCATION_DATA[newCommunity] : [])
+      } else {
+        // Si cambia la ciudad...
+        setFormData((prev) => ({ ...prev, [field]: value || '' }))
+      }
     }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -137,7 +163,7 @@ const Page: FunctionComponent = () => {
           </Typography>
           <Box component='form' onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              {/* --- Campos sin cambios --- */}
+              {/* --- Campos Título, Descripciones, Fechas, etc. (se mantienen igual) --- */}
               <Grid item size={{ xs: 12 }}>
                 <TextField
                   name='title'
@@ -265,19 +291,7 @@ const Page: FunctionComponent = () => {
                     />
                   </Grid>
 
-                  {/* --- ORDEN CORREGIDO: CIUDAD PRIMERO --- */}
-                  <Grid item size={{ xs: 12, sm: 6 }}>
-                    <Autocomplete
-                      options={PROVINCIAL_CAPITALS}
-                      value={formData.venue_city || null}
-                      onChange={handleSingleAutocompleteChange('venue_city')}
-                      freeSolo // Permitir ciudades/pueblos no capitales
-                      renderInput={(params) => (
-                        <TextField {...params} label='Ciudad' />
-                      )}
-                    />
-                  </Grid>
-                  {/* --- ORDEN CORREGIDO: COMUNIDAD SEGUNDO --- */}
+                  {/* --- 1. COMUNIDAD AUTÓNOMA (Elige primero) --- */}
                   <Grid item size={{ xs: 12, sm: 6 }}>
                     <Autocomplete
                       options={AUTONOMOUS_COMMUNITIES}
@@ -286,7 +300,29 @@ const Page: FunctionComponent = () => {
                         'venue_community'
                       )}
                       renderInput={(params) => (
-                        <TextField {...params} label='Comunidad Autónoma' />
+                        <TextField
+                          {...params}
+                          label='Comunidad Autónoma'
+                          required={!formData.is_online} // Requerido si no es online
+                        />
+                      )}
+                    />
+                  </Grid>
+
+                  {/* --- 2. CIUDAD (Filtrada por comunidad) --- */}
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <Autocomplete
+                      options={availableCities} // <-- Opciones dinámicas
+                      value={formData.venue_city || null}
+                      onChange={handleSingleAutocompleteChange('venue_city')}
+                      disabled={!formData.venue_community} // <-- Deshabilitado hasta elegir comunidad
+                      freeSolo // Permitir ciudades no listadas
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label='Ciudad'
+                          required={!formData.is_online} // Requerido si no es online
+                        />
                       )}
                     />
                   </Grid>

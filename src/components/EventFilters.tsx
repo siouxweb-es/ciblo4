@@ -31,7 +31,7 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
   onFilterChange,
   initialFilters
 }) => {
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
   const [filters, setFilters] = useState<EventFilterParams>(initialFilters)
 
   const handleToggle = () => setIsOpen(!isOpen)
