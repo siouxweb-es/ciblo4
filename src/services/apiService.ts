@@ -46,7 +46,7 @@ export const login = (
   })
 }
 
-// --- ARREGLADO ---
+// --- register (se queda igual) ---
 export const register = (data: RegisterDTO): Promise<AuthResponse> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -82,9 +82,7 @@ export const register = (data: RegisterDTO): Promise<AuthResponse> => {
         organization: newUserOrg
       }
 
-      // --- LÍNEA ARREGLADA ---
       mockUsers.push(newUser) // Modificamos la copia local
-      // --- FIN DEL ARREGLO ---
 
       const authResponse: AuthResponse = {
         user: newUser,
@@ -98,7 +96,7 @@ export const register = (data: RegisterDTO): Promise<AuthResponse> => {
   })
 }
 
-// --- Funciones de Eventos (sin cambios) ---
+// --- getEvents (se queda igual) ---
 export const getEvents = (filters: EventFilterParams): Promise<Event[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -124,8 +122,7 @@ export const getEvents = (filters: EventFilterParams): Promise<Event[]> => {
         filteredEvents = filteredEvents.filter(
           (e) =>
             (e.venue_city && filters.locations.includes(e.venue_city)) ||
-            (e.venue_community && // <-- AÑADIDO PARA FILTRAR POR COMUNIDAD
-              filters.locations.includes(e.venue_community))
+            (e.venue_community && filters.locations.includes(e.venue_community))
         )
       }
       if (filters.levels.length > 0) {
@@ -137,6 +134,8 @@ export const getEvents = (filters: EventFilterParams): Promise<Event[]> => {
     }, SIMULATED_DELAY / 2)
   })
 }
+
+// --- getEventBySlug (se queda igual) ---
 export const getEventBySlug = (slug: string): Promise<Event> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -149,19 +148,27 @@ export const getEventBySlug = (slug: string): Promise<Event> => {
     }, SIMULATED_DELAY / 3)
   })
 }
+
+// --- subscribeToEvent (MODIFICADO) ---
 export const subscribeToEvent = (
   eventId: string,
   email: string
 ): Promise<{ message: string }> => {
   return new Promise((resolve) => {
     setTimeout(() => {
+      // Lógica de API simulada: Incrementar el contador de asistentes
+      const eventIndex = mockEvents.findIndex((e) => e.id === eventId)
+      if (eventIndex !== -1) {
+        mockEvents[eventIndex].current_attendees += 1
+      }
+
       console.log(`Email ${email} suscrito al evento ${eventId}`)
       resolve({ message: '¡Suscripción confirmada!' })
     }, SIMULATED_DELAY)
   })
 }
 
-// --- Funciones de User (getMe sin cambios) ---
+// --- getMe (se queda igual) ---
 export const getMe = (userId: string): Promise<User> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -175,15 +182,13 @@ export const getMe = (userId: string): Promise<User> => {
   })
 }
 
-// --- ARREGLADO ---
+// --- unsubscribeFromEvent (se queda igual) ---
 export const unsubscribeFromEvent = (
   userId: string,
   eventId: string
 ): Promise<void> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      // --- LÍNEA ARREGLADA ---
-      // Modificamos la copia local
       mockUsers = mockUsers.map((user) => {
         if (user.id === userId) {
           return {
@@ -195,7 +200,6 @@ export const unsubscribeFromEvent = (
         }
         return user
       })
-      // --- FIN DEL ARREGLO ---
       console.log(
         `Usuario ${userId} ha cancelado suscripción al evento ${eventId}`
       )
@@ -204,7 +208,7 @@ export const unsubscribeFromEvent = (
   })
 }
 
-// --- Funciones de Organizador (getDashboard y getOrgEvents sin cambios) ---
+// --- getOrganizerDashboard (se queda igual) ---
 export const getOrganizerDashboard = (
   orgId: string
 ): Promise<DashboardStats> => {
@@ -226,6 +230,8 @@ export const getOrganizerDashboard = (
     }, SIMULATED_DELAY / 2)
   })
 }
+
+// --- getOrganizationEvents (se queda igual) ---
 export const getOrganizationEvents = (orgId: string): Promise<Event[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -235,7 +241,7 @@ export const getOrganizationEvents = (orgId: string): Promise<Event[]> => {
   })
 }
 
-// --- ARREGLADO ---
+// --- createEvent (se queda igual) ---
 export const createEvent = (
   eventData: CreateEventDTO,
   organization: OrganizationSummary
@@ -255,17 +261,13 @@ export const createEvent = (
         type: eventData.tags[0] || 'General',
         ...eventData
       }
-
-      // --- LÍNEA ARREGLADA ---
-      mockEvents.push(newEvent) // Modificamos la copia local
-      // --- FIN DEL ARREGLO ---
-
+      mockEvents.push(newEvent)
       resolve(newEvent)
     }, SIMULATED_DELAY)
   })
 }
 
-// --- NUEVA FUNCIÓN ---
+// --- updateEvent (se queda igual) ---
 export const updateEvent = (
   eventId: string,
   eventData: Partial<CreateEventDTO>
@@ -281,28 +283,24 @@ export const updateEvent = (
       const updatedEvent: Event = {
         ...originalEvent,
         ...eventData,
-        // Asegurarse de que el slug se actualiza si el título cambia
         slug: eventData.title
           ? eventData.title.toLowerCase().replace(/\s+/g, '-')
           : originalEvent.slug,
-        id: originalEvent.id, // Asegurarse de que el ID no cambie
-        organization: originalEvent.organization // Asegurarse de que la org no cambie
+        id: originalEvent.id,
+        organization: originalEvent.organization
       }
 
-      mockEvents[eventIndex] = updatedEvent // Modificamos la copia local
+      mockEvents[eventIndex] = updatedEvent
       resolve(updatedEvent)
     }, SIMULATED_DELAY)
   })
 }
-// --- FIN NUEVA FUNCIÓN ---
 
-// --- ARREGLADO ---
+// --- deleteEvent (se queda igual) ---
 export const deleteEvent = (eventId: string): Promise<void> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      // --- LÍNEA ARREGLADA ---
-      mockEvents = mockEvents.filter((e) => e.id !== eventId) // Modificamos la copia local
-      // --- FIN DEL ARREGLO ---
+      mockEvents = mockEvents.filter((e) => e.id !== eventId)
       resolve()
     }, SIMULATED_DELAY / 2)
   })

@@ -12,11 +12,12 @@ import {
   Autocomplete
 } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { useSubmit } from 'react-router-dom' // <-- IMPORTAR useSubmit
 import { EventFilterParams } from '../types'
 import {
-  LOCATION_DATA, // <-- Objeto con la relación Comunidad-Ciudades
-  AUTONOMOUS_COMMUNITIES, // <-- Lista de Comunidades
-  ALL_CITIES, // <-- Lista de TODAS las ciudades
+  LOCATION_DATA,
+  AUTONOMOUS_COMMUNITIES,
+  ALL_CITIES,
   CYBERSECURITY_TAGS,
   EVENT_LEVELS
 } from '../constants/filters'
@@ -25,29 +26,46 @@ import ExpandMore from '@mui/icons-material/ExpandMore'
 import FilterListIcon from '@mui/icons-material/FilterList'
 
 interface EventFiltersProps {
-  onFilterChange: (filters: EventFilterParams) => void
+  // onFilterChange: (filters: EventFilterParams) => void // <-- PROP ELIMINADA
   initialFilters: EventFilterParams
 }
 
 export const EventFilters: React.FC<EventFiltersProps> = ({
-  onFilterChange,
   initialFilters
 }) => {
-  const [isOpen, setIsOpen] = useState(false) // Mantenemos el colapso por defecto
+  const [isOpen, setIsOpen] = useState(false)
+  const submit = useSubmit() // <-- HOOK de React Router
 
-  // Estado para los filtros de Nivel y Tags (sin cambios)
+  // Los estados locales se inicializan desde initialFilters (que viene de la URL)
   const [levels, setLevels] = useState<string[]>(initialFilters.levels)
   const [tags, setTags] = useState<string[]>(initialFilters.tags)
   const [dates, setDates] = useState({
     startDate: initialFilters.startDate,
     endDate: initialFilters.endDate
   })
-
-  // --- NUEVO ESTADO PARA LOCALIZACIONES ---
-  const [selectedCommunities, setSelectedCommunities] = useState<string[]>([])
-  const [selectedCities, setSelectedCities] = useState<string[]>([])
+  const [selectedCommunities, setSelectedCommunities] = useState<string[]>(
+    // Filtramos las 'locations' iniciales para ver cuáles son comunidades
+    initialFilters.locations.filter((loc) =>
+      AUTONOMOUS_COMMUNITIES.includes(loc)
+    )
+  )
+  const [selectedCities, setSelectedCities] = useState<string[]>(
+    // Filtramos las 'locations' iniciales para ver cuáles son ciudades
+    initialFilters.locations.filter((loc) => ALL_CITIES.includes(loc))
+  )
   const [availableCities, setAvailableCities] = useState<string[]>(ALL_CITIES)
-  // --- FIN NUEVO ESTADO ---
+
+  // Efecto para inicializar las ciudades disponibles si hay una comunidad
+  useEffect(() => {
+    if (selectedCommunities.length > 0) {
+      const citiesFromSelectedCommunities = selectedCommunities.flatMap(
+        (community) => LOCATION_DATA[community] || []
+      )
+      setAvailableCities([...new Set(citiesFromSelectedCommunities)].sort())
+    } else {
+      setAvailableCities(ALL_CITIES)
+    }
+  }, [selectedCommunities])
 
   const handleToggle = () => setIsOpen(!isOpen)
 
@@ -56,7 +74,6 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
       setDates((prev) => ({ ...prev, [field]: date }))
     }
 
-  // --- NUEVOS HANDLERS DE LOCALIZACIÓN ---
   const handleCommunityChange = (
     event: React.SyntheticEvent,
     value: string[]
@@ -64,20 +81,16 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
     setSelectedCommunities(value)
 
     if (value.length > 0) {
-      // Si se selecciona al menos una comunidad, filtramos las ciudades
       const citiesFromSelectedCommunities = value.flatMap(
         (community) => LOCATION_DATA[community] || []
       )
       setAvailableCities([...new Set(citiesFromSelectedCommunities)].sort())
-
-      // Limpiamos las ciudades seleccionadas que no pertenezan a la nueva lista
       setSelectedCities((prevCities) =>
         prevCities.filter((city) =>
           citiesFromSelectedCommunities.includes(city)
         )
       )
     } else {
-      // Si no hay comunidades seleccionadas, mostramos todas las ciudades
       setAvailableCities(ALL_CITIES)
     }
   }
@@ -85,7 +98,6 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
   const handleCityChange = (event: React.SyntheticEvent, value: string[]) => {
     setSelectedCities(value)
   }
-  // --- FIN NUEVOS HANDLERS ---
 
   const handleMultiSelectChange =
     (setter: React.Dispatch<React.SetStateAction<string[]>>) =>
@@ -93,29 +105,31 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
       setter(value)
     }
 
+  // --- FUNCIÓN DE ENVÍO MODIFICADA ---
   const handleApplyFilters = () => {
-    // Combinamos comunidades y ciudades en el array 'locations'
     const allLocations = [
       ...new Set([...selectedCommunities, ...selectedCities])
     ]
 
-    onFilterChange({
-      startDate: dates.startDate,
-      endDate: dates.endDate,
-      tags: tags,
-      locations: allLocations,
-      levels: levels
-    })
+    // Creamos los parámetros de búsqueda
+    const searchParams = new URLSearchParams()
+    if (dates.startDate) {
+      searchParams.set('startDate', dates.startDate.toISOString())
+    }
+    if (dates.endDate) {
+      searchParams.set('endDate', dates.endDate.toISOString())
+    }
+    tags.forEach((tag) => searchParams.append('tags', tag))
+    allLocations.forEach((loc) => searchParams.append('locations', loc))
+    levels.forEach((level) => searchParams.append('levels', level))
+
+    // Usamos useSubmit para "enviar" los filtros a la URL
+    // Esto re-ejecutará el loader de App.tsx
+    submit(searchParams)
   }
 
+  // --- FUNCIÓN DE LIMPIEZA MODIFICADA ---
   const handleClearFilters = () => {
-    const clearedFilters: EventFilterParams = {
-      startDate: null,
-      endDate: null,
-      tags: [],
-      locations: [],
-      levels: []
-    }
     // Reseteamos todos los estados locales
     setDates({ startDate: null, endDate: null })
     setTags([])
@@ -124,8 +138,8 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
     setSelectedCities([])
     setAvailableCities(ALL_CITIES)
 
-    // Enviamos los filtros limpios
-    onFilterChange(clearedFilters)
+    // Enviamos un submit vacío a la URL, limpiándola
+    submit(null, { action: '/', method: 'get' })
   }
 
   return (
@@ -139,6 +153,7 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
         boxShadow: 'var(--shadow-drop)'
       }}
     >
+      {/* ... (Cabecera del filtro se mantiene igual) ... */}
       <Box
         onClick={handleToggle}
         sx={{
@@ -158,8 +173,11 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
       </Box>
 
       <Collapse in={isOpen}>
-        <Box sx={{ pt: 3 }}>
+        {/* Usamos un Box en lugar de <Form> para manejar el envío manualmente con el botón */}
+        <Box component='div' sx={{ pt: 3 }}>
           <Grid container spacing={3}>
+            {/* ... (Todos los campos Autocomplete y DatePicker se mantienen igual) ... */}
+
             {/* Filtro de Fechas */}
             <Grid item size={{ xs: 12, md: 6 }}>
               <DatePicker
@@ -178,7 +196,7 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
               />
             </Grid>
 
-            {/* --- FILTRO DE LOCALIZACIÓN MODIFICADO --- */}
+            {/* Filtro de Localización */}
             <Grid item size={{ xs: 12, md: 6 }}>
               <Autocomplete
                 multiple
@@ -201,7 +219,6 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
                 )}
               />
             </Grid>
-            {/* --- FIN FILTRO LOCALIZACIÓN --- */}
 
             {/* Filtro de Tags */}
             <Grid item size={{ xs: 12 }}>
@@ -243,11 +260,11 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
               <Button variant='outlined' onClick={handleClearFilters}>
                 Limpiar Filtros
               </Button>
+              {/* Botón de Aplicar ahora llama a handleApplyFilters */}
               <Button
                 variant='contained'
                 onClick={handleApplyFilters}
                 sx={{
-                  // Aplicamos el estilo unificado de botón
                   background: 'var(--gradient-button-primary)',
                   '&:hover': {
                     background: 'var(--gradient-button-primary-hover)'

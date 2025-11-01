@@ -6,7 +6,7 @@ import React, {
   ReactNode,
   useEffect
 } from 'react'
-import { User, Role, AuthResponse, RegisterDTO } from '../types' // Importamos RegisterDTO
+import { User, Role, AuthResponse, RegisterDTO, Event } from '../types' // <-- AÑADIR Event
 import * as apiService from '../services/apiService'
 import { useNavigate } from 'react-router-dom'
 
@@ -17,9 +17,9 @@ interface AuthContextType {
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => void
-  // --- NUEVO PARA EL REGISTRO ---
   register: (data: RegisterDTO) => Promise<void>
   refreshUserData: (updatedUser: User) => void
+  subscribeToEvent: (event: Event) => Promise<void> // <-- NUEVA FUNCIÓN
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -51,12 +51,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   }, [])
 
   const handleLoginSuccess = (data: AuthResponse) => {
+    // ... (código de handleLoginSuccess se queda igual) ...
     setUser(data.user)
     setToken(data.access_token)
     localStorage.setItem('user', JSON.stringify(data.user))
     localStorage.setItem('token', data.access_token)
 
-    // Redirigir según el rol
     if (data.user.role === Role.Admin) {
       navigate('/panel-de-organizador')
     } else if (data.user.role === Role.Organizer) {
@@ -67,6 +67,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   }
 
   const login = async (email: string, password: string) => {
+    // ... (código de login se queda igual) ...
     setIsLoading(true)
     try {
       const data = await apiService.login(email, password)
@@ -94,13 +95,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.setItem('user', JSON.stringify(updatedUser))
   }
 
-  // --- NUEVO PARA EL REGISTRO ---
   const register = async (data: RegisterDTO) => {
+    // ... (código de register se queda igual) ...
     setIsLoading(true)
     try {
-      // 1. Llama a la API simulada para registrar
       const authData = await apiService.register(data)
-      // 2. Si tiene éxito, inicia sesión automáticamente
       handleLoginSuccess(authData)
     } catch (error) {
       setIsLoading(false)
@@ -109,6 +108,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       setIsLoading(false)
     }
   }
+
+  // --- NUEVA FUNCIÓN DE INSCRIPCIÓN ---
+  const subscribeToEvent = async (event: Event): Promise<void> => {
+    if (!user) throw new Error('Usuario no autenticado')
+
+    // 1. Comprobar si ya está inscrito
+    const isAlreadySubscribed = user.FavoriteEvents?.some(
+      (favEvent) => favEvent.id === event.id
+    )
+    if (isAlreadySubscribed) {
+      console.log('El usuario ya está inscrito en este evento.')
+      return
+    }
+
+    // 2. Actualizar el estado local (AuthContext)
+    const updatedFavoriteEvents = [...(user.FavoriteEvents || []), event]
+    const updatedUser = {
+      ...user,
+      FavoriteEvents: updatedFavoriteEvents
+    }
+
+    // 3. Actualizar el estado y localStorage
+    refreshUserData(updatedUser)
+
+    // 4. Llamar a la API (simulada) para actualizar contadores
+    try {
+      await apiService.subscribeToEvent(event.id, user.email)
+    } catch (error) {
+      console.error('Error al llamar a la API de suscripción:', error)
+      // (En un caso real, aquí haríamos un rollback del estado local si la API falla)
+    }
+  }
+  // --- FIN NUEVA FUNCIÓN ---
 
   return (
     <AuthContext.Provider
@@ -119,8 +151,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         isLoading,
         login,
         logout,
-        register, // Exponemos la nueva función
-        refreshUserData
+        register,
+        refreshUserData,
+        subscribeToEvent // <-- Exponemos la nueva función
       }}
     >
       {!isLoading && children}

@@ -13,55 +13,25 @@ import { useLoaderData, useNavigation } from 'react-router-dom'
 import { EventMap } from '../components/EventMap'
 import { EventCard } from '../components/EventCard'
 import { Event, EventFilterParams } from '../types'
-import * as apiService from '../services/apiService'
+// import * as apiService from '../services/apiService' // <-- Ya no es necesario
 import { EventFilters } from '../components/EventFilters'
 
+// --- INTERFAZ DEL LOADER MODIFICADA ---
+interface LandingLoaderData {
+  events: Event[]
+  filters: EventFilterParams
+}
+
 const LandingPage: FunctionComponent = () => {
-  // --- CORREGIDO: Tipado a Event[] ---
-  const initialEvents = useLoaderData() as Event[]
+  // --- LÓGICA SIMPLIFICADA ---
+  const { events, filters } = useLoaderData() as LandingLoaderData
   const navigation = useNavigation()
 
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>(initialEvents)
-  // --- FIN CORREGIDO ---
-
-  const [isLoadingFilters, setIsLoadingFilters] = useState(false)
-  const [currentFilters, setCurrentFilters] = useState<EventFilterParams>({
-    startDate: null,
-    endDate: null,
-    tags: [],
-    locations: [],
-    levels: []
-  })
-
-  const handleFilterChange = async (filters: EventFilterParams) => {
-    setIsLoadingFilters(true)
-    setCurrentFilters(filters)
-    try {
-      const events = await apiService.getEvents(filters)
-      setFilteredEvents(events)
-    } catch (error) {
-      console.error('Error al filtrar eventos:', error)
-      // Aquí se podría mostrar una notificación al usuario
-    } finally {
-      setIsLoadingFilters(false)
-    }
-  }
-
   // El estado de carga principal lo gestiona React Router
-  if (navigation.state === 'loading' && !isLoadingFilters) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '80vh'
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    )
-  }
+  const isLoading = navigation.state === 'loading'
+  // --- FIN LÓGICA SIMPLIFICADA ---
+
+  // Ya no necesitamos handleFilterChange ni isLoadingFilters
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -76,27 +46,23 @@ const LandingPage: FunctionComponent = () => {
           Próximos Eventos de Ciberseguridad
         </Typography>
 
-        {/* Filtros y Listado de Eventos */}
-        <EventFilters
-          onFilterChange={handleFilterChange}
-          initialFilters={currentFilters}
-        />
+        {/* Filtros: ahora recibe los filtros iniciales desde el loader */}
+        <EventFilters initialFilters={filters} />
 
         {/* Mapa Interactivo */}
         <Box sx={{ my: 5, display: 'flex', justifyContent: 'center' }}>
-          <EventMap events={filteredEvents} />
+          <EventMap events={events} />
         </Box>
 
-        {isLoadingFilters ? (
+        {/* La carga es gestionada por React Router */}
+        {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
             <CircularProgress />
           </Box>
         ) : (
           <Grid container spacing={4} justifyContent='center'>
-            {filteredEvents.length > 0 ? (
-              filteredEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))
+            {events.length > 0 ? (
+              events.map((event) => <EventCard key={event.id} event={event} />)
             ) : (
               <Grid item size={{ xs: 12 }}>
                 {' '}

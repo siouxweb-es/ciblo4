@@ -1,5 +1,5 @@
 // src/pages/Eventos.tsx
-import { FunctionComponent } from 'react'
+import { FunctionComponent, useState } from 'react' // <-- Añadido useState
 import {
   Box,
   Typography,
@@ -8,10 +8,11 @@ import {
   Container,
   CircularProgress,
   Chip,
-  Divider
+  Divider,
+  Alert // <-- Añadido Alert
 } from '@mui/material'
 import { useLoaderData, useNavigation } from 'react-router-dom'
-import { Layout } from '../components/Layout'
+// import { Layout } from '../components/Layout' // <-- Layout no se usa aquí
 import { Event } from '../types'
 import { SingleEventMap } from '../components/SingleEventMap'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
@@ -21,6 +22,7 @@ import CategoryIcon from '@mui/icons-material/Category'
 import SchoolIcon from '@mui/icons-material/School'
 import { useAuth } from '../context/AuthContext'
 
+// ... (función formatDateRange se mantiene igual) ...
 const formatDateRange = (start: string, end: string) => {
   const startDate = new Date(start)
   const endDate = new Date(end)
@@ -44,9 +46,36 @@ const formatDateRange = (start: string, end: string) => {
 const Eventos: FunctionComponent = () => {
   const event = useLoaderData() as Event
   const navigation = useNavigation()
-  const { isAuthenticated } = useAuth()
+
+  // --- LÓGICA DE INSCRIPCIÓN ---
+  const { isAuthenticated, user, subscribeToEvent } = useAuth()
+  const [isSubscribing, setIsSubscribing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Comprobamos si el usuario ya está inscrito (usando el estado de AuthContext)
+  const isAlreadySubscribed = user?.FavoriteEvents?.some(
+    (favEvent) => favEvent.id === event.id
+  )
+
+  const handleSubscribe = async () => {
+    if (isAlreadySubscribed) return
+
+    setIsSubscribing(true)
+    setError(null)
+    try {
+      await subscribeToEvent(event)
+      // El estado 'isAlreadySubscribed' se actualizará automáticamente
+      // porque el 'user' de useAuth() cambiará
+    } catch (err: any) {
+      setError(err.message || 'Error al inscribirse.')
+    } finally {
+      setIsSubscribing(false)
+    }
+  }
+  // --- FIN LÓGICA DE INSCRIPCIÓN ---
 
   if (navigation.state === 'loading') {
+    // ... (Spinner de carga se mantiene igual) ...
     return (
       <Box
         sx={{
@@ -62,6 +91,7 @@ const Eventos: FunctionComponent = () => {
   }
 
   if (!event) {
+    // ... (Mensaje de evento no encontrado se mantiene igual) ...
     return (
       <Container sx={{ textAlign: 'center', mt: 8 }}>
         <Typography variant='h4'>Evento no encontrado</Typography>
@@ -75,10 +105,8 @@ const Eventos: FunctionComponent = () => {
   return (
     <Container maxWidth='lg' sx={{ my: 5 }}>
       <Grid container spacing={4}>
-        {/* Columna Izquierda: Imagen y Detalles */}
+        {/* ... (Columna Izquierda: Imagen y Detalles se mantiene igual) ... */}
         <Grid item size={{ xs: 12, md: 8 }}>
-          {' '}
-          {/* 'item' añadido */}
           <Box
             component='img'
             src={
@@ -131,19 +159,13 @@ const Eventos: FunctionComponent = () => {
           </Box>
         </Grid>
 
-        {/* Columna Derecha: Panel de Información y Acción */}
+        {/* --- Columna Derecha: Panel de Acción MODIFICADO --- */}
         <Grid item size={{ xs: 12, md: 4 }}>
-          {' '}
-          {/* 'item' añadido */}
           <Box sx={{ position: 'sticky', top: 100 }}>
             <Box sx={{ border: '1px solid #ddd', borderRadius: '16px', p: 3 }}>
+              {/* ... (Detalles de Fecha, Lugar y Precio se mantienen igual) ... */}
               <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  mb: 2
-                }}
+                sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}
               >
                 <CalendarTodayIcon />
                 <Typography variant='body2'>
@@ -151,54 +173,63 @@ const Eventos: FunctionComponent = () => {
                 </Typography>
               </Box>
               <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  mb: 2
-                }}
+                sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}
               >
                 <LocationOnIcon />
                 <Typography variant='body2'>
-                  {/* --- LÍNEA CORREGIDA --- */}
                   {event.is_online
                     ? 'Evento Online'
-                    : `${event.venue_name}, ${event.venue_city}, ${
+                    : `${event.venue_name || ''}, ${event.venue_city || ''}, ${
                         event.venue_community || ''
                       }`}
-                  {/* --- FIN CORRECCIÓN --- */}
                 </Typography>
               </Box>
               <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  mb: 3
-                }}
+                sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}
               >
                 <ConfirmationNumberIcon />
                 <Typography variant='body2'>
                   {event.is_free ? 'Gratuito' : `Desde ${event.price}€`}
                 </Typography>
               </Box>
+
+              {/* --- LÓGICA DEL BOTÓN MODIFICADA --- */}
               <Button
                 variant='contained'
                 fullWidth
                 size='large'
-                disabled={!isAuthenticated}
+                disabled={
+                  !isAuthenticated || isAlreadySubscribed || isSubscribing
+                }
+                onClick={handleSubscribe}
                 sx={{
                   borderRadius: '25px',
-                  background: 'var(--gradient-button-primary)',
+                  background: isAlreadySubscribed
+                    ? 'grey'
+                    : 'var(--gradient-button-primary)',
                   '&:hover': {
-                    background: 'var(--gradient-button-primary-hover)'
+                    background: isAlreadySubscribed
+                      ? 'grey'
+                      : 'var(--gradient-button-primary-hover)'
                   }
                 }}
               >
-                {isAuthenticated
-                  ? 'Inscribirse Ahora'
-                  : 'Inicia sesión para inscribirte'}
+                {isSubscribing ? (
+                  <CircularProgress size={26} color='inherit' />
+                ) : !isAuthenticated ? (
+                  'Inicia sesión para inscribirte'
+                ) : isAlreadySubscribed ? (
+                  'Ya estás inscrito'
+                ) : (
+                  'Inscribirse Ahora'
+                )}
               </Button>
+              {error && (
+                <Alert severity='error' sx={{ mt: 2 }}>
+                  {error}
+                </Alert>
+              )}
+              {/* --- FIN LÓGICA DEL BOTÓN --- */}
             </Box>
             {event.latitude && event.longitude && (
               <SingleEventMap event={event} />

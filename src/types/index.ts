@@ -74,7 +74,7 @@ export interface Event {
   venue_name?: string
   venue_address?: string
   venue_city?: string
-  venue_community?: string // <-- CAMBIO: Añadido
+  venue_community?: string
   venue_country?: string
   latitude?: number
   longitude?: number
@@ -125,4 +125,18 @@ export interface DashboardStats {
   total_attendees: number
   total_cities: number
   published_events: number
+}
+
+// --- INTERFAZ PARA AuthContext ---
+// (La añadimos aquí para coherencia, aunque esté en AuthContext.tsx)
+export interface AuthContextType {
+  user: User | null
+  token: string | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  login: (email: string, password: string) => Promise<void>
+  logout: () => void
+  register: (data: RegisterDTO) => Promise<void>
+  refreshUserData: (updatedUser: User) => void
+  subscribeToEvent: (event: Event) => Promise<void>
 }
