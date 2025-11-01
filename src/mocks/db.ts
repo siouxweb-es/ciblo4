@@ -49,6 +49,7 @@ export let mockEvents: Event[] = [
     venue_name: 'Palacio de Congresos',
     venue_address: 'Paseo de la Castellana, 99',
     venue_city: 'Madrid',
+    venue_community: 'Madrid, Comunidad de', // <-- CAMPO AÑADIDO
     venue_country: 'Spain',
     latitude: 40.452,
     longitude: -3.6922,
@@ -81,6 +82,7 @@ export let mockEvents: Event[] = [
     is_online: true,
     online_url: 'https://zoom.us/j/123456',
     venue_city: 'Online',
+    venue_community: 'Online', // <-- CAMPO AÑADIDO
     max_attendees: 30,
     current_attendees: 15,
     is_free: false,
@@ -110,6 +112,7 @@ export let mockEvents: Event[] = [
     venue_name: 'Universidad Politécnica',
     venue_address: 'Campus Universitario, Aula Magna',
     venue_city: 'Barcelona',
+    venue_community: 'Cataluña', // <-- CAMPO AÑADIDO
     venue_country: 'Spain',
     latitude: 41.3851,
     longitude: 2.1734,
@@ -142,6 +145,7 @@ export let mockEvents: Event[] = [
     venue_name: 'Cámara de Comercio',
     venue_address: 'Plaza de la Contratación, 8',
     venue_city: 'Sevilla',
+    venue_community: 'Andalucía', // <-- CAMPO AÑADIDO
     venue_country: 'Spain',
     latitude: 37.3826,
     longitude: -5.9965,

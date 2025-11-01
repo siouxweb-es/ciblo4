@@ -81,7 +81,6 @@ const Eventos: FunctionComponent = () => {
           {/* 'item' añadido */}
           <Box
             component='img'
-            // --- CORREGIDO: De '| |' a '||' ---
             src={
               event.banner_url ||
               event.image_url ||
@@ -161,9 +160,13 @@ const Eventos: FunctionComponent = () => {
               >
                 <LocationOnIcon />
                 <Typography variant='body2'>
+                  {/* --- LÍNEA CORREGIDA --- */}
                   {event.is_online
                     ? 'Evento Online'
-                    : `${event.venue_name}, ${event.venue_city}`}
+                    : `${event.venue_name}, ${event.venue_city}, ${
+                        event.venue_community || ''
+                      }`}
+                  {/* --- FIN CORRECCIÓN --- */}
                 </Typography>
               </Box>
               <Box

@@ -19,10 +19,10 @@ import {
 } from '@mui/material'
 import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { useNavigate, useLoaderData } from 'react-router-dom' // <-- AÑADIDO useLoaderData
+import { useNavigate, useLoaderData } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import * as apiService from '../services/apiService'
-import { CreateEventDTO, Event } from '../types' // <-- AÑADIDO Event
+import { CreateEventDTO, Event } from '../types'
 import {
   CYBERSECURITY_TAGS,
   EVENT_LEVELS,
@@ -33,13 +33,12 @@ import {
 const Page: FunctionComponent = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const loadedEvent = useLoaderData() as Event | null // <-- OBTENER DATOS DEL LOADER
-  const isEditMode = !!loadedEvent // <-- DETERMINAR MODO
+  const loadedEvent = useLoaderData() as Event | null
+  const isEditMode = !!loadedEvent
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // --- MODIFICADO: El estado se inicializa con los datos del loader si existen ---
   const [formData, setFormData] = useState<Partial<CreateEventDTO>>({
     title: loadedEvent?.title || '',
     description: loadedEvent?.description || '',
@@ -47,7 +46,6 @@ const Page: FunctionComponent = () => {
     type: loadedEvent?.type || 'conference',
     category: loadedEvent?.category || '',
     level: loadedEvent?.level || 'intermediate',
-    // Convertir fechas de string (del loader) a objetos Date
     start_date: loadedEvent ? new Date(loadedEvent.start_date) : new Date(),
     end_date: loadedEvent ? new Date(loadedEvent.end_date) : new Date(),
     is_online: loadedEvent?.is_online || false,
@@ -87,7 +85,6 @@ const Page: FunctionComponent = () => {
       setFormData((prev) => ({ ...prev, [field]: value || '' }))
     }
 
-  // --- MODIFICADO: handleSubmit ahora maneja ambos casos (Crear y Editar) ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user || !user.organization) {
@@ -110,14 +107,11 @@ const Page: FunctionComponent = () => {
       } as CreateEventDTO
 
       if (isEditMode) {
-        // --- MODO EDICIÓN ---
         await apiService.updateEvent(loadedEvent.id, eventData)
       } else {
-        // --- MODO CREACIÓN ---
         await apiService.createEvent(eventData, user.organization)
       }
 
-      // Navegar al panel de organizador después de la acción
       navigate('/panel-de-organizador')
     } catch (err: any) {
       setError(
@@ -139,14 +133,11 @@ const Page: FunctionComponent = () => {
             fontWeight='bold'
             gutterBottom
           >
-            {/* --- TÍTULO DINÁMICO --- */}
             {isEditMode ? 'Editar Evento' : 'Crear Nuevo Evento'}
           </Typography>
           <Box component='form' onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              {/* --- TODOS LOS CAMPOS DEL FORMULARIO --- */}
-              {/* (Usan 'value' de formData, por lo que se rellenan automáticamente) */}
-
+              {/* --- Campos sin cambios --- */}
               <Grid item size={{ xs: 12 }}>
                 <TextField
                   name='title'
@@ -237,6 +228,8 @@ const Page: FunctionComponent = () => {
                   onChange={handleDateChange('end_date')}
                 />
               </Grid>
+              {/* --- Fin campos sin cambios --- */}
+
               <Grid item size={{ xs: 12 }}>
                 <FormControlLabel
                   control={
@@ -249,6 +242,8 @@ const Page: FunctionComponent = () => {
                   label='Evento Online'
                 />
               </Grid>
+
+              {/* --- CAMPOS DE LOCALIZACIÓN CORREGIDOS --- */}
               <Collapse in={!formData.is_online} sx={{ width: '100%' }}>
                 <Grid container spacing={3} sx={{ p: 2, pt: 0 }}>
                   <Grid item size={{ xs: 12 }}>
@@ -269,6 +264,20 @@ const Page: FunctionComponent = () => {
                       onChange={handleChange}
                     />
                   </Grid>
+
+                  {/* --- ORDEN CORREGIDO: CIUDAD PRIMERO --- */}
+                  <Grid item size={{ xs: 12, sm: 6 }}>
+                    <Autocomplete
+                      options={PROVINCIAL_CAPITALS}
+                      value={formData.venue_city || null}
+                      onChange={handleSingleAutocompleteChange('venue_city')}
+                      freeSolo // Permitir ciudades/pueblos no capitales
+                      renderInput={(params) => (
+                        <TextField {...params} label='Ciudad' />
+                      )}
+                    />
+                  </Grid>
+                  {/* --- ORDEN CORREGIDO: COMUNIDAD SEGUNDO --- */}
                   <Grid item size={{ xs: 12, sm: 6 }}>
                     <Autocomplete
                       options={AUTONOMOUS_COMMUNITIES}
@@ -281,19 +290,10 @@ const Page: FunctionComponent = () => {
                       )}
                     />
                   </Grid>
-                  <Grid item size={{ xs: 12, sm: 6 }}>
-                    <Autocomplete
-                      options={PROVINCIAL_CAPITALS}
-                      value={formData.venue_city || null}
-                      onChange={handleSingleAutocompleteChange('venue_city')}
-                      freeSolo
-                      renderInput={(params) => (
-                        <TextField {...params} label='Ciudad' />
-                      )}
-                    />
-                  </Grid>
                 </Grid>
               </Collapse>
+              {/* --- FIN DE CAMPOS DE LOCALIZACIÓN --- */}
+
               <Collapse in={formData.is_online} sx={{ width: '100%', px: 2 }}>
                 <TextField
                   name='online_url'
@@ -353,7 +353,6 @@ const Page: FunctionComponent = () => {
                     }
                   }}
                 >
-                  {/* --- TEXTO DE BOTÓN DINÁMICO --- */}
                   {isLoading ? (
                     <CircularProgress size={24} />
                   ) : isEditMode ? (

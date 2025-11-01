@@ -23,7 +23,6 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const navigate = useNavigate()
 
   const onCardClick = useCallback(() => {
-    // --- CORREGIDO: De '| |' a '||' ---
     navigate(`/eventos/${event.slug || event.id}`)
   }, [navigate, event])
 
@@ -52,7 +51,6 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
         {/* Imagen del Evento */}
         <Box
           component='img'
-          // --- CORREGIDO: De '| |' a '||' ---
           src={
             event.image_url ||
             '/cyberLogo-gigapixel-art-scale-2-00x-godpix-1@2x.png'
@@ -107,9 +105,13 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
             >
               <LocationOnIcon sx={{ mr: 1, color: 'var(--color-cadetblue)' }} />
               <Typography variant='body2'>
+                {/* --- LÍNEA CORREGIDA --- */}
                 {event.is_online
                   ? 'Online'
-                  : `${event.venue_city}, ${event.venue_country}`}
+                  : `${event.venue_city}, ${
+                      event.venue_community || event.venue_country
+                    }`}
+                {/* --- FIN CORRECCIÓN --- */}
               </Typography>
             </Grid>
             <Grid
