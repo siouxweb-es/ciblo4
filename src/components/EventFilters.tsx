@@ -12,7 +12,7 @@ import {
   Autocomplete
 } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { useSubmit } from 'react-router-dom' // <-- IMPORTAR useSubmit
+import { useSubmit } from 'react-router-dom'
 import { EventFilterParams } from '../types'
 import {
   LOCATION_DATA,
@@ -26,7 +26,6 @@ import ExpandMore from '@mui/icons-material/ExpandMore'
 import FilterListIcon from '@mui/icons-material/FilterList'
 
 interface EventFiltersProps {
-  // onFilterChange: (filters: EventFilterParams) => void // <-- PROP ELIMINADA
   initialFilters: EventFilterParams
 }
 
@@ -34,9 +33,8 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
   initialFilters
 }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const submit = useSubmit() // <-- HOOK de React Router
+  const submit = useSubmit()
 
-  // Los estados locales se inicializan desde initialFilters (que viene de la URL)
   const [levels, setLevels] = useState<string[]>(initialFilters.levels)
   const [tags, setTags] = useState<string[]>(initialFilters.tags)
   const [dates, setDates] = useState({
@@ -44,18 +42,15 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
     endDate: initialFilters.endDate
   })
   const [selectedCommunities, setSelectedCommunities] = useState<string[]>(
-    // Filtramos las 'locations' iniciales para ver cuáles son comunidades
     initialFilters.locations.filter((loc) =>
       AUTONOMOUS_COMMUNITIES.includes(loc)
     )
   )
   const [selectedCities, setSelectedCities] = useState<string[]>(
-    // Filtramos las 'locations' iniciales para ver cuáles son ciudades
     initialFilters.locations.filter((loc) => ALL_CITIES.includes(loc))
   )
   const [availableCities, setAvailableCities] = useState<string[]>(ALL_CITIES)
 
-  // Efecto para inicializar las ciudades disponibles si hay una comunidad
   useEffect(() => {
     if (selectedCommunities.length > 0) {
       const citiesFromSelectedCommunities = selectedCommunities.flatMap(
@@ -105,13 +100,11 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
       setter(value)
     }
 
-  // --- FUNCIÓN DE ENVÍO MODIFICADA ---
   const handleApplyFilters = () => {
     const allLocations = [
       ...new Set([...selectedCommunities, ...selectedCities])
     ]
 
-    // Creamos los parámetros de búsqueda
     const searchParams = new URLSearchParams()
     if (dates.startDate) {
       searchParams.set('startDate', dates.startDate.toISOString())
@@ -123,14 +116,10 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
     allLocations.forEach((loc) => searchParams.append('locations', loc))
     levels.forEach((level) => searchParams.append('levels', level))
 
-    // Usamos useSubmit para "enviar" los filtros a la URL
-    // Esto re-ejecutará el loader de App.tsx
     submit(searchParams)
   }
 
-  // --- FUNCIÓN DE LIMPIEZA MODIFICADA ---
   const handleClearFilters = () => {
-    // Reseteamos todos los estados locales
     setDates({ startDate: null, endDate: null })
     setTags([])
     setLevels([])
@@ -138,7 +127,6 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
     setSelectedCities([])
     setAvailableCities(ALL_CITIES)
 
-    // Enviamos un submit vacío a la URL, limpiándola
     submit(null, { action: '/', method: 'get' })
   }
 
@@ -153,7 +141,6 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
         boxShadow: 'var(--shadow-drop)'
       }}
     >
-      {/* ... (Cabecera del filtro se mantiene igual) ... */}
       <Box
         onClick={handleToggle}
         sx={{
@@ -173,12 +160,8 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
       </Box>
 
       <Collapse in={isOpen}>
-        {/* Usamos un Box en lugar de <Form> para manejar el envío manualmente con el botón */}
         <Box component='div' sx={{ pt: 3 }}>
           <Grid container spacing={3}>
-            {/* ... (Todos los campos Autocomplete y DatePicker se mantienen igual) ... */}
-
-            {/* Filtro de Fechas */}
             <Grid item size={{ xs: 12, md: 6 }}>
               <DatePicker
                 label='Desde'
@@ -196,7 +179,6 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
               />
             </Grid>
 
-            {/* Filtro de Localización */}
             <Grid item size={{ xs: 12, md: 6 }}>
               <Autocomplete
                 multiple
@@ -220,7 +202,6 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
               />
             </Grid>
 
-            {/* Filtro de Tags */}
             <Grid item size={{ xs: 12 }}>
               <Autocomplete
                 multiple
@@ -233,7 +214,6 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
               />
             </Grid>
 
-            {/* Filtro de Nivel */}
             <Grid item size={{ xs: 12 }}>
               <Autocomplete
                 multiple
@@ -246,7 +226,6 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
               />
             </Grid>
 
-            {/* Botones de Acción */}
             <Grid
               item
               size={{ xs: 12 }}
@@ -260,7 +239,6 @@ export const EventFilters: React.FC<EventFiltersProps> = ({
               <Button variant='outlined' onClick={handleClearFilters}>
                 Limpiar Filtros
               </Button>
-              {/* Botón de Aplicar ahora llama a handleApplyFilters */}
               <Button
                 variant='contained'
                 onClick={handleApplyFilters}

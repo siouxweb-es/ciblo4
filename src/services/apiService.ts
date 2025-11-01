@@ -1,5 +1,5 @@
 // src/services/apiService.ts
-import { mockUsers as dbUsers, mockEvents as dbEvents } from '../mocks/db' // Renombramos la importación
+import { mockUsers as dbUsers, mockEvents as dbEvents } from '../mocks/db'
 import {
   AuthResponse,
   User,
@@ -12,15 +12,12 @@ import {
   OrganizationSummary
 } from '../types'
 
-// --- LÍNEAS ARREGLADAS ---
-// Creamos copias locales que SÍ podemos modificar
 let mockUsers = [...dbUsers]
 let mockEvents = [...dbEvents]
-// --- FIN DEL ARREGLO ---
 
 const SIMULATED_DELAY = 1000
 
-// --- Login (se queda igual) ---
+// --- login (sin cambios) ---
 export const login = (
   email: string,
   password: string
@@ -46,7 +43,7 @@ export const login = (
   })
 }
 
-// --- register (se queda igual) ---
+// --- register (sin cambios) ---
 export const register = (data: RegisterDTO): Promise<AuthResponse> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -82,7 +79,7 @@ export const register = (data: RegisterDTO): Promise<AuthResponse> => {
         organization: newUserOrg
       }
 
-      mockUsers.push(newUser) // Modificamos la copia local
+      mockUsers.push(newUser)
 
       const authResponse: AuthResponse = {
         user: newUser,
@@ -96,7 +93,7 @@ export const register = (data: RegisterDTO): Promise<AuthResponse> => {
   })
 }
 
-// --- getEvents (se queda igual) ---
+// --- getEvents (sin cambios) ---
 export const getEvents = (filters: EventFilterParams): Promise<Event[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -135,7 +132,7 @@ export const getEvents = (filters: EventFilterParams): Promise<Event[]> => {
   })
 }
 
-// --- getEventBySlug (se queda igual) ---
+// --- getEventBySlug (sin cambios) ---
 export const getEventBySlug = (slug: string): Promise<Event> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -156,7 +153,6 @@ export const subscribeToEvent = (
 ): Promise<{ message: string }> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      // Lógica de API simulada: Incrementar el contador de asistentes
       const eventIndex = mockEvents.findIndex((e) => e.id === eventId)
       if (eventIndex !== -1) {
         mockEvents[eventIndex].current_attendees += 1
@@ -168,7 +164,7 @@ export const subscribeToEvent = (
   })
 }
 
-// --- getMe (se queda igual) ---
+// --- getMe (sin cambios) ---
 export const getMe = (userId: string): Promise<User> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -182,7 +178,7 @@ export const getMe = (userId: string): Promise<User> => {
   })
 }
 
-// --- unsubscribeFromEvent (se queda igual) ---
+// --- unsubscribeFromEvent (sin cambios) ---
 export const unsubscribeFromEvent = (
   userId: string,
   eventId: string
@@ -208,7 +204,7 @@ export const unsubscribeFromEvent = (
   })
 }
 
-// --- getOrganizerDashboard (se queda igual) ---
+// --- getOrganizerDashboard (sin cambios) ---
 export const getOrganizerDashboard = (
   orgId: string
 ): Promise<DashboardStats> => {
@@ -231,7 +227,7 @@ export const getOrganizerDashboard = (
   })
 }
 
-// --- getOrganizationEvents (se queda igual) ---
+// --- getOrganizationEvents (sin cambios) ---
 export const getOrganizationEvents = (orgId: string): Promise<Event[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -241,7 +237,7 @@ export const getOrganizationEvents = (orgId: string): Promise<Event[]> => {
   })
 }
 
-// --- createEvent (se queda igual) ---
+// --- createEvent (sin cambios) ---
 export const createEvent = (
   eventData: CreateEventDTO,
   organization: OrganizationSummary
@@ -267,7 +263,7 @@ export const createEvent = (
   })
 }
 
-// --- updateEvent (se queda igual) ---
+// --- updateEvent (sin cambios) ---
 export const updateEvent = (
   eventId: string,
   eventData: Partial<CreateEventDTO>
@@ -296,7 +292,7 @@ export const updateEvent = (
   })
 }
 
-// --- deleteEvent (se queda igual) ---
+// --- deleteEvent (sin cambios) ---
 export const deleteEvent = (eventId: string): Promise<void> => {
   return new Promise((resolve) => {
     setTimeout(() => {

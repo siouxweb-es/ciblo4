@@ -1,5 +1,5 @@
 // src/pages/Eventos.tsx
-import { FunctionComponent, useState } from 'react' // <-- Añadido useState
+import { FunctionComponent, useState } from 'react'
 import {
   Box,
   Typography,
@@ -9,10 +9,9 @@ import {
   CircularProgress,
   Chip,
   Divider,
-  Alert // <-- Añadido Alert
+  Alert
 } from '@mui/material'
 import { useLoaderData, useNavigation } from 'react-router-dom'
-// import { Layout } from '../components/Layout' // <-- Layout no se usa aquí
 import { Event } from '../types'
 import { SingleEventMap } from '../components/SingleEventMap'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
@@ -22,7 +21,6 @@ import CategoryIcon from '@mui/icons-material/Category'
 import SchoolIcon from '@mui/icons-material/School'
 import { useAuth } from '../context/AuthContext'
 
-// ... (función formatDateRange se mantiene igual) ...
 const formatDateRange = (start: string, end: string) => {
   const startDate = new Date(start)
   const endDate = new Date(end)
@@ -47,12 +45,10 @@ const Eventos: FunctionComponent = () => {
   const event = useLoaderData() as Event
   const navigation = useNavigation()
 
-  // --- LÓGICA DE INSCRIPCIÓN ---
   const { isAuthenticated, user, subscribeToEvent } = useAuth()
   const [isSubscribing, setIsSubscribing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Comprobamos si el usuario ya está inscrito (usando el estado de AuthContext)
   const isAlreadySubscribed = user?.FavoriteEvents?.some(
     (favEvent) => favEvent.id === event.id
   )
@@ -64,18 +60,14 @@ const Eventos: FunctionComponent = () => {
     setError(null)
     try {
       await subscribeToEvent(event)
-      // El estado 'isAlreadySubscribed' se actualizará automáticamente
-      // porque el 'user' de useAuth() cambiará
     } catch (err: any) {
       setError(err.message || 'Error al inscribirse.')
     } finally {
       setIsSubscribing(false)
     }
   }
-  // --- FIN LÓGICA DE INSCRIPCIÓN ---
 
   if (navigation.state === 'loading') {
-    // ... (Spinner de carga se mantiene igual) ...
     return (
       <Box
         sx={{
@@ -91,7 +83,6 @@ const Eventos: FunctionComponent = () => {
   }
 
   if (!event) {
-    // ... (Mensaje de evento no encontrado se mantiene igual) ...
     return (
       <Container sx={{ textAlign: 'center', mt: 8 }}>
         <Typography variant='h4'>Evento no encontrado</Typography>
@@ -105,7 +96,6 @@ const Eventos: FunctionComponent = () => {
   return (
     <Container maxWidth='lg' sx={{ my: 5 }}>
       <Grid container spacing={4}>
-        {/* ... (Columna Izquierda: Imagen y Detalles se mantiene igual) ... */}
         <Grid item size={{ xs: 12, md: 8 }}>
           <Box
             component='img'
@@ -159,11 +149,9 @@ const Eventos: FunctionComponent = () => {
           </Box>
         </Grid>
 
-        {/* --- Columna Derecha: Panel de Acción MODIFICADO --- */}
         <Grid item size={{ xs: 12, md: 4 }}>
           <Box sx={{ position: 'sticky', top: 100 }}>
             <Box sx={{ border: '1px solid #ddd', borderRadius: '16px', p: 3 }}>
-              {/* ... (Detalles de Fecha, Lugar y Precio se mantienen igual) ... */}
               <Box
                 sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}
               >
@@ -193,7 +181,6 @@ const Eventos: FunctionComponent = () => {
                 </Typography>
               </Box>
 
-              {/* --- LÓGICA DEL BOTÓN MODIFICADA --- */}
               <Button
                 variant='contained'
                 fullWidth
@@ -229,7 +216,6 @@ const Eventos: FunctionComponent = () => {
                   {error}
                 </Alert>
               )}
-              {/* --- FIN LÓGICA DEL BOTÓN --- */}
             </Box>
             {event.latitude && event.longitude && (
               <SingleEventMap event={event} />

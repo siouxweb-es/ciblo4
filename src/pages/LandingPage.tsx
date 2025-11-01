@@ -1,5 +1,5 @@
 // src/pages/LandingPage.tsx
-import { FunctionComponent, useState } from 'react'
+import { FunctionComponent } from 'react' // No necesitamos useState
 import {
   Box,
   Typography,
@@ -13,10 +13,10 @@ import { useLoaderData, useNavigation } from 'react-router-dom'
 import { EventMap } from '../components/EventMap'
 import { EventCard } from '../components/EventCard'
 import { Event, EventFilterParams } from '../types'
-// import * as apiService from '../services/apiService' // <-- Ya no es necesario
+// import * as apiService from '../services/apiService' // No se usa
 import { EventFilters } from '../components/EventFilters'
 
-// --- INTERFAZ DEL LOADER MODIFICADA ---
+// --- INTERFAZ DEL LOADER ---
 interface LandingLoaderData {
   events: Event[]
   filters: EventFilterParams
@@ -27,11 +27,8 @@ const LandingPage: FunctionComponent = () => {
   const { events, filters } = useLoaderData() as LandingLoaderData
   const navigation = useNavigation()
 
-  // El estado de carga principal lo gestiona React Router
   const isLoading = navigation.state === 'loading'
   // --- FIN LÓGICA SIMPLIFICADA ---
-
-  // Ya no necesitamos handleFilterChange ni isLoadingFilters
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -46,15 +43,12 @@ const LandingPage: FunctionComponent = () => {
           Próximos Eventos de Ciberseguridad
         </Typography>
 
-        {/* Filtros: ahora recibe los filtros iniciales desde el loader */}
         <EventFilters initialFilters={filters} />
 
-        {/* Mapa Interactivo */}
         <Box sx={{ my: 5, display: 'flex', justifyContent: 'center' }}>
           <EventMap events={events} />
         </Box>
 
-        {/* La carga es gestionada por React Router */}
         {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
             <CircularProgress />
@@ -65,8 +59,6 @@ const LandingPage: FunctionComponent = () => {
               events.map((event) => <EventCard key={event.id} event={event} />)
             ) : (
               <Grid item size={{ xs: 12 }}>
-                {' '}
-                {/* 'item' añadido */}
                 <Typography align='center' sx={{ mt: 5 }}>
                   No se encontraron eventos que coincidan con los filtros
                   seleccionados.

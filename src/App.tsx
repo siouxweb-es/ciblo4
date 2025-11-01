@@ -9,10 +9,11 @@ import {
   RouterProvider
 } from 'react-router-dom'
 import React, { useEffect } from 'react'
-import { AuthProvider, useAuth } from './context/AuthContext'
+import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Layout } from './components/Layout'
-import { Role, User, EventFilterParams } from './types' // Importa EventFilterParams
+// ¡ESTA LÍNEA ES LA QUE CAUSABA EL CRASH! Ahora 'EventFilterParams' sí existe.
+import { Role, User, EventFilterParams } from './types'
 import * as apiService from './services/apiService'
 
 // Importación de todas las páginas
@@ -24,13 +25,66 @@ import PanelDeOrganizador from './pages/PanelDeOrganizador'
 import Page from './pages/Page'
 import ErrorPage from './pages/ErrorPage'
 
-// ... (Importaciones de MUI se mantienen) ...
+import {
+  CssBaseline,
+  ThemeProvider,
+  createTheme,
+  StyledEngineProvider
+} from '@mui/material'
+
 import './global.css'
 
-// ... (Componente AppWrapper se mantiene igual) ...
-// ... (Recuerda que AppWrapper gestiona los títulos de las páginas) ...
+// Componente Wrapper (sin cambios)
+const AppWrapper = () => {
+  const location = useLocation()
+  const pathname = location.pathname
+  const action = useNavigationType()
 
-// --- DEFINICIÓN DE RUTAS CORREGIDA ---
+  useEffect(() => {
+    if (action !== 'POP') {
+      window.scrollTo(0, 0)
+    }
+  }, [action, pathname])
+
+  useEffect(() => {
+    let title = 'CibESphere'
+    let metaDescription =
+      'Plataforma central de eventos de ciberseguridad en España.'
+
+    if (pathname.startsWith('/eventos/')) {
+      title = 'Detalle del Evento - CibESphere'
+    } else if (pathname === '/panel-de-usuario') {
+      title = 'Mi Panel - CibESphere'
+    } else if (pathname === '/panel-de-organizador') {
+      title = 'Panel de Organizador - CibESphere'
+    } else if (pathname === '/crear-evento') {
+      title = 'Crear Evento - CibESphere'
+    } else if (pathname.endsWith('/editar')) {
+      title = 'Editar Evento - CibESphere'
+    } else if (pathname === '/loginsign-up') {
+      title = 'Acceso / Registro - CibESphere'
+    }
+
+    document.title = title
+
+    const metaDescriptionTag = document.querySelector(
+      'head > meta[name="description"]'
+    )
+    if (metaDescriptionTag) {
+      metaDescriptionTag.setAttribute('content', metaDescription)
+    }
+  }, [pathname])
+
+  return (
+    <AuthProvider>
+      <Layout>
+        <Outlet />
+      </Layout>
+    </AuthProvider>
+  )
+}
+
+// --- DEFINICIÓN DE RUTAS (CON LOADER MODIFICADO) ---
 const routes: RouteObject[] = [
   {
     path: '/',
@@ -41,7 +95,6 @@ const routes: RouteObject[] = [
         index: true,
         element: <LandingPage />,
         // --- LOADER MODIFICADO ---
-        // Ahora lee los parámetros de la URL para filtrar
         loader: async ({ request }) => {
           const url = new URL(request.url)
           const searchParams = url.searchParams
@@ -68,7 +121,6 @@ const routes: RouteObject[] = [
         path: 'loginsign-up',
         element: <SignUp />
       },
-      // ... (Ruta 'eventos/:slug' se mantiene igual) ...
       {
         path: 'eventos/:slug',
         element: <Eventos />,
@@ -80,7 +132,7 @@ const routes: RouteObject[] = [
         }
       },
 
-      // ... (Ruta 'panel-de-usuario' se mantiene igual) ...
+      // --- Rutas Protegidas Asistentes (sin cambios) ---
       {
         element: <ProtectedRoute allowedRoles={[Role.User, Role.Admin]} />,
         children: [
@@ -97,7 +149,7 @@ const routes: RouteObject[] = [
         ]
       },
 
-      // ... (Rutas de 'panel-de-organizador', 'crear-evento', 'editar' se mantienen igual) ...
+      // --- Rutas Protegidas Organizador (sin cambios) ---
       {
         element: <ProtectedRoute allowedRoles={[Role.Organizer, Role.Admin]} />,
         children: [
@@ -149,8 +201,10 @@ const routes: RouteObject[] = [
   }
 ]
 
-// ... (Resto del archivo 'App.tsx' se mantiene igual) ...
+// Creación del router (sin cambios)
 export const router = createBrowserRouter(routes)
+
+// Componente App (sin cambios)
 const muiTheme = createTheme()
 
 function App() {

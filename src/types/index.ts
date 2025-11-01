@@ -108,7 +108,7 @@ export interface CreateEventDTO
   organization_id: string
 }
 
-// --- TIPOS DE FILTROS ---
+// --- TIPOS DE FILTROS (EL TIPO QUE FALTABA) ---
 
 export interface EventFilterParams {
   startDate: Date | null
@@ -125,18 +125,4 @@ export interface DashboardStats {
   total_attendees: number
   total_cities: number
   published_events: number
-}
-
-// --- INTERFAZ PARA AuthContext ---
-// (La añadimos aquí para coherencia, aunque esté en AuthContext.tsx)
-export interface AuthContextType {
-  user: User | null
-  token: string | null
-  isAuthenticated: boolean
-  isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
-  logout: () => void
-  register: (data: RegisterDTO) => Promise<void>
-  refreshUserData: (updatedUser: User) => void
-  subscribeToEvent: (event: Event) => Promise<void>
 }
