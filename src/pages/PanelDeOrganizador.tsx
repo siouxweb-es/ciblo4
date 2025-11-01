@@ -60,6 +60,15 @@ const PanelDeOrganizador: FunctionComponent = () => {
     navigate('/crear-evento')
   }, [navigate])
 
+  // --- NUEVA FUNCIÓN ---
+  const onEditarEventoClick = useCallback(
+    (slug: string) => {
+      navigate(`/eventos/${slug}/editar`)
+    },
+    [navigate]
+  )
+  // --- FIN NUEVA FUNCIÓN ---
+
   const handleDeleteEvent = async (eventId: string) => {
     if (window.confirm('¿Estás seguro de que quieres borrar este evento?')) {
       try {
@@ -104,7 +113,13 @@ const PanelDeOrganizador: FunctionComponent = () => {
           variant='contained'
           startIcon={<AddCircleOutlineIcon />}
           onClick={onCrearEventoClick}
-          sx={{ borderRadius: '25px' }}
+          sx={{
+            borderRadius: '25px',
+            background: 'var(--gradient-button-primary)', // <-- ESTILO UNIFICADO
+            '&:hover': {
+              background: 'var(--gradient-button-primary-hover)' // <-- ESTILO UNIFICADO
+            }
+          }}
         >
           Crear Nuevo Evento
         </Button>
@@ -179,7 +194,11 @@ const PanelDeOrganizador: FunctionComponent = () => {
                     </Typography>
                   </Box>
                   <Box>
-                    <IconButton color='primary'>
+                    {/* --- BOTÓN EDITAR MODIFICADO --- */}
+                    <IconButton
+                      color='primary'
+                      onClick={() => onEditarEventoClick(event.slug)}
+                    >
                       <EditIcon />
                     </IconButton>
                     <IconButton

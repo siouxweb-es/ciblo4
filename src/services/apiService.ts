@@ -124,7 +124,8 @@ export const getEvents = (filters: EventFilterParams): Promise<Event[]> => {
         filteredEvents = filteredEvents.filter(
           (e) =>
             (e.venue_city && filters.locations.includes(e.venue_city)) ||
-            (e.venue_country && filters.locations.includes(e.venue_country))
+            (e.venue_community && // <-- AÑADIDO PARA FILTRAR POR COMUNIDAD
+              filters.locations.includes(e.venue_community))
         )
       }
       if (filters.levels.length > 0) {
@@ -263,6 +264,37 @@ export const createEvent = (
     }, SIMULATED_DELAY)
   })
 }
+
+// --- NUEVA FUNCIÓN ---
+export const updateEvent = (
+  eventId: string,
+  eventData: Partial<CreateEventDTO>
+): Promise<Event> => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const eventIndex = mockEvents.findIndex((e) => e.id === eventId)
+      if (eventIndex === -1) {
+        return reject(new Error('Evento no encontrado para actualizar'))
+      }
+
+      const originalEvent = mockEvents[eventIndex]
+      const updatedEvent: Event = {
+        ...originalEvent,
+        ...eventData,
+        // Asegurarse de que el slug se actualiza si el título cambia
+        slug: eventData.title
+          ? eventData.title.toLowerCase().replace(/\s+/g, '-')
+          : originalEvent.slug,
+        id: originalEvent.id, // Asegurarse de que el ID no cambie
+        organization: originalEvent.organization // Asegurarse de que la org no cambie
+      }
+
+      mockEvents[eventIndex] = updatedEvent // Modificamos la copia local
+      resolve(updatedEvent)
+    }, SIMULATED_DELAY)
+  })
+}
+// --- FIN NUEVA FUNCIÓN ---
 
 // --- ARREGLADO ---
 export const deleteEvent = (eventId: string): Promise<void> => {

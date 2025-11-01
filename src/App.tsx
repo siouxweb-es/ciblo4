@@ -22,7 +22,7 @@ import Eventos from './pages/Eventos'
 import PanelDeUsuario from './pages/PanelDeUsuario'
 import PanelDeOrganizador from './pages/PanelDeOrganizador'
 import Page from './pages/Page' // Página de creación de eventos
-import ErrorPage from './pages/ErrorPage'
+import ErrorPage from './pages/ErrorPage' // <-- IMPORTAR NUESTRA PÁGINA
 
 // Importaciones de MUI (necesarias para index.tsx si lo fusionamos)
 import {
@@ -60,6 +60,9 @@ const AppWrapper = () => {
       title = 'Panel de Organizador - CibESphere'
     } else if (pathname === '/crear-evento') {
       title = 'Crear Evento - CibESphere'
+    } else if (pathname.endsWith('/editar')) {
+      // <-- AÑADIDO
+      title = 'Editar Evento - CibESphere'
     } else if (pathname === '/loginsign-up') {
       title = 'Acceso / Registro - CibESphere'
     }
@@ -89,7 +92,7 @@ const routes: RouteObject[] = [
   {
     path: '/',
     element: <AppWrapper />, // AppWrapper es el layout raíz que incluye AuthProvider y Layout
-    errorElement: <ErrorPage />,
+    errorElement: <ErrorPage />, // <-- AÑADIDO ELEMENTO DE ERROR RAÍZ
     children: [
       {
         index: true,
@@ -172,7 +175,20 @@ const routes: RouteObject[] = [
           {
             path: 'crear-evento',
             element: <Page />
+          },
+          // --- NUEVA RUTA DE EDICIÓN ---
+          {
+            path: 'eventos/:slug/editar',
+            element: <Page />,
+            loader: async ({ params }) => {
+              if (!params.slug) {
+                throw new Response('Not Found', { status: 404 })
+              }
+              // Reutilizamos el loader de la página de detalles
+              return apiService.getEventBySlug(params.slug)
+            }
           }
+          // --- FIN NUEVA RUTA ---
         ]
       }
     ]

@@ -15,36 +15,50 @@ import {
   FormControlLabel,
   Autocomplete,
   Alert,
-  Collapse // Importar Collapse
+  Collapse
 } from '@mui/material'
 import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLoaderData } from 'react-router-dom' // <-- AÑADIDO useLoaderData
 import { useAuth } from '../context/AuthContext'
 import * as apiService from '../services/apiService'
-import { CreateEventDTO } from '../types'
-import { CYBERSECURITY_TAGS, EVENT_LEVELS } from '../constants/filters'
+import { CreateEventDTO, Event } from '../types' // <-- AÑADIDO Event
+import {
+  CYBERSECURITY_TAGS,
+  EVENT_LEVELS,
+  PROVINCIAL_CAPITALS,
+  AUTONOMOUS_COMMUNITIES
+} from '../constants/filters'
 
 const Page: FunctionComponent = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const loadedEvent = useLoaderData() as Event | null // <-- OBTENER DATOS DEL LOADER
+  const isEditMode = !!loadedEvent // <-- DETERMINAR MODO
+
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // --- CORREGIDO ---
+  // --- MODIFICADO: El estado se inicializa con los datos del loader si existen ---
   const [formData, setFormData] = useState<Partial<CreateEventDTO>>({
-    // --- FIN CORREGIDO ---
-    title: '',
-    description: '',
-    short_desc: '',
-    type: 'conference',
-    category: '',
-    level: 'intermediate',
-    start_date: new Date(),
-    end_date: new Date(),
-    is_online: false,
-    is_free: true,
-    tags: [] // <-- CORREGIDO: Inicializar como array vacío
+    title: loadedEvent?.title || '',
+    description: loadedEvent?.description || '',
+    short_desc: loadedEvent?.short_desc || '',
+    type: loadedEvent?.type || 'conference',
+    category: loadedEvent?.category || '',
+    level: loadedEvent?.level || 'intermediate',
+    // Convertir fechas de string (del loader) a objetos Date
+    start_date: loadedEvent ? new Date(loadedEvent.start_date) : new Date(),
+    end_date: loadedEvent ? new Date(loadedEvent.end_date) : new Date(),
+    is_online: loadedEvent?.is_online || false,
+    is_free: loadedEvent?.is_free || true,
+    tags: loadedEvent?.tags || [],
+    venue_name: loadedEvent?.venue_name || '',
+    venue_address: loadedEvent?.venue_address || '',
+    venue_city: loadedEvent?.venue_city || '',
+    venue_community: loadedEvent?.venue_community || '',
+    online_url: loadedEvent?.online_url || '',
+    price: loadedEvent?.price || 0
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,17 +76,26 @@ const Page: FunctionComponent = () => {
       }
     }
 
-  // --- CORREGIDO: 'value' ahora es string[] ---
   const handleAutocompleteChange =
     (field: 'tags') => (event: any, value: string[]) => {
       setFormData((prev) => ({ ...prev, [field]: value }))
     }
-  // --- FIN CORREGIDO ---
 
+  const handleSingleAutocompleteChange =
+    (field: 'venue_city' | 'venue_community') =>
+    (event: any, value: string | null) => {
+      setFormData((prev) => ({ ...prev, [field]: value || '' }))
+    }
+
+  // --- MODIFICADO: handleSubmit ahora maneja ambos casos (Crear y Editar) ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user || !user.organization) {
-      setError('Debes ser un organizador verificado para crear un evento.')
+      setError(
+        'Debes ser un organizador verificado para ' +
+          (isEditMode ? 'editar' : 'crear') +
+          ' un evento.'
+      )
       return
     }
 
@@ -82,13 +105,25 @@ const Page: FunctionComponent = () => {
     try {
       const eventData: CreateEventDTO = {
         ...formData,
-        organization_id: user.organization.id
-      } as CreateEventDTO // Asumimos que el formulario está completo
+        organization_id: user.organization.id,
+        venue_country: 'España'
+      } as CreateEventDTO
 
-      await apiService.createEvent(eventData, user.organization) // Pasamos la organización
+      if (isEditMode) {
+        // --- MODO EDICIÓN ---
+        await apiService.updateEvent(loadedEvent.id, eventData)
+      } else {
+        // --- MODO CREACIÓN ---
+        await apiService.createEvent(eventData, user.organization)
+      }
+
+      // Navegar al panel de organizador después de la acción
       navigate('/panel-de-organizador')
     } catch (err: any) {
-      setError(err.message || 'Error al crear el evento.')
+      setError(
+        err.message ||
+          `Error al ${isEditMode ? 'actualizar' : 'crear'} el evento.`
+      )
     } finally {
       setIsLoading(false)
     }
@@ -104,18 +139,21 @@ const Page: FunctionComponent = () => {
             fontWeight='bold'
             gutterBottom
           >
-            Crear Nuevo Evento
+            {/* --- TÍTULO DINÁMICO --- */}
+            {isEditMode ? 'Editar Evento' : 'Crear Nuevo Evento'}
           </Typography>
           <Box component='form' onSubmit={handleSubmit}>
             <Grid container spacing={3}>
+              {/* --- TODOS LOS CAMPOS DEL FORMULARIO --- */}
+              {/* (Usan 'value' de formData, por lo que se rellenan automáticamente) */}
+
               <Grid item size={{ xs: 12 }}>
-                {' '}
-                {/* 'item' añadido */}
                 <TextField
                   name='title'
                   label='Título del Evento'
                   fullWidth
                   required
+                  value={formData.title}
                   onChange={handleChange}
                 />
               </Grid>
@@ -125,6 +163,7 @@ const Page: FunctionComponent = () => {
                   label='Descripción Corta (máx 200 caracteres)'
                   fullWidth
                   required
+                  value={formData.short_desc}
                   onChange={handleChange}
                   inputProps={{ maxLength: 200 }}
                 />
@@ -137,6 +176,7 @@ const Page: FunctionComponent = () => {
                   required
                   multiline
                   rows={4}
+                  value={formData.description}
                   onChange={handleChange}
                 />
               </Grid>
@@ -211,38 +251,45 @@ const Page: FunctionComponent = () => {
               </Grid>
               <Collapse in={!formData.is_online} sx={{ width: '100%' }}>
                 <Grid container spacing={3} sx={{ p: 2, pt: 0 }}>
-                  {' '}
-                  {/* Ajustado padding */}
                   <Grid item size={{ xs: 12 }}>
                     <TextField
                       name='venue_name'
-                      label='Nombre del Lugar'
+                      label='Nombre del Lugar (Ej: IFEMA, Palacio Euskalduna...)'
                       fullWidth
+                      value={formData.venue_name}
                       onChange={handleChange}
                     />
                   </Grid>
                   <Grid item size={{ xs: 12 }}>
                     <TextField
                       name='venue_address'
-                      label='Dirección'
+                      label='Dirección (Ej: Av. del Partenón, 5)'
                       fullWidth
+                      value={formData.venue_address}
                       onChange={handleChange}
                     />
                   </Grid>
                   <Grid item size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      name='venue_city'
-                      label='Ciudad'
-                      fullWidth
-                      onChange={handleChange}
+                    <Autocomplete
+                      options={AUTONOMOUS_COMMUNITIES}
+                      value={formData.venue_community || null}
+                      onChange={handleSingleAutocompleteChange(
+                        'venue_community'
+                      )}
+                      renderInput={(params) => (
+                        <TextField {...params} label='Comunidad Autónoma' />
+                      )}
                     />
                   </Grid>
                   <Grid item size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      name='venue_country'
-                      label='País'
-                      fullWidth
-                      onChange={handleChange}
+                    <Autocomplete
+                      options={PROVINCIAL_CAPITALS}
+                      value={formData.venue_city || null}
+                      onChange={handleSingleAutocompleteChange('venue_city')}
+                      freeSolo
+                      renderInput={(params) => (
+                        <TextField {...params} label='Ciudad' />
+                      )}
                     />
                   </Grid>
                 </Grid>
@@ -252,6 +299,7 @@ const Page: FunctionComponent = () => {
                   name='online_url'
                   label='URL del Evento Online'
                   fullWidth
+                  value={formData.online_url}
                   onChange={handleChange}
                 />
               </Collapse>
@@ -273,6 +321,7 @@ const Page: FunctionComponent = () => {
                   label='Precio'
                   type='number'
                   fullWidth
+                  value={formData.price}
                   onChange={handleChange}
                   InputProps={{
                     startAdornment: (
@@ -296,8 +345,22 @@ const Page: FunctionComponent = () => {
                   variant='contained'
                   size='large'
                   disabled={isLoading}
+                  sx={{
+                    borderRadius: '25px',
+                    background: 'var(--gradient-button-primary)',
+                    '&:hover': {
+                      background: 'var(--gradient-button-primary-hover)'
+                    }
+                  }}
                 >
-                  {isLoading ? <CircularProgress size={24} /> : 'Crear Evento'}
+                  {/* --- TEXTO DE BOTÓN DINÁMICO --- */}
+                  {isLoading ? (
+                    <CircularProgress size={24} />
+                  ) : isEditMode ? (
+                    'Guardar Cambios'
+                  ) : (
+                    'Crear Evento'
+                  )}
                 </Button>
               </Grid>
             </Grid>

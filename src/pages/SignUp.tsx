@@ -1,5 +1,6 @@
 // src/pages/SignUp.tsx
 import { FunctionComponent, useState } from 'react'
+import { useForm, SubmitHandler, Controller } from 'react-hook-form'
 import {
   Box,
   Typography,
@@ -30,49 +31,42 @@ const SignUp: FunctionComponent = () => {
   const { login, register } = useAuth()
   const [isLogin, setIsLogin] = useState(true)
 
-  // --- CORREGIDO ---
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Estado para el formulario de registro
-  const [role, setRole] = useState<Role>(Role.User)
-  const [formData, setFormData] = useState<RegisterDTO>({
-    // --- FIN CORREGIDO ---
-    email: '',
-    password: '',
-    first_name: '',
-    last_name: '',
-    role: Role.User,
-    organization_name: '',
-    organization_website: ''
+  // --- NUEVO: Configuración de React Hook Form ---
+  const {
+    register: registerForm,
+    handleSubmit,
+    control, // Para componentes controlados (MUI)
+    watch, // Para observar cambios (ej. el rol)
+    formState: { errors }
+  } = useForm<RegisterDTO>({
+    defaultValues: {
+      email: '',
+      password: '',
+      first_name: '',
+      last_name: '',
+      role: Role.User,
+      organization_name: '',
+      organization_website: ''
+    }
   })
 
-  const handleFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const role = watch('role') // Observamos el valor del rol
+  // --- FIN NUEVO ---
 
-  const handleRoleChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newRole: Role | null
-  ) => {
-    if (newRole !== null) {
-      setRole(newRole)
-      setFormData((prev) => ({ ...prev, role: newRole }))
-    }
-  }
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  // --- MODIFICADO: Esta es la lógica que se ejecuta al enviar ---
+  const onSubmit: SubmitHandler<RegisterDTO> = async (data: RegisterDTO) => {
     setIsLoading(true)
     setError(null)
     try {
       if (isLogin) {
-        await login(formData.email, formData.password)
+        await login(data.email, data.password)
         // La redirección se maneja en AuthContext
       } else {
-        await register(formData)
+        await register(data)
         // La redirección se maneja en AuthContext
       }
     } catch (err: any) {
@@ -130,20 +124,29 @@ const SignUp: FunctionComponent = () => {
           <Typography variant='h5' fontWeight='bold' mb={2}>
             {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
           </Typography>
-          <Box component='form' onSubmit={handleSubmit}>
+          <Box component='form' onSubmit={handleSubmit(onSubmit)}>
             {!isLogin && (
               <Box mb={2}>
-                <ToggleButtonGroup
-                  value={role}
-                  exclusive
-                  onChange={handleRoleChange}
-                  fullWidth
-                >
-                  <ToggleButton value={Role.User}>Asistente</ToggleButton>
-                  <ToggleButton value={Role.Organizer}>
-                    Organizador
-                  </ToggleButton>
-                </ToggleButtonGroup>
+                {/* --- MODIFICADO: Conectado con RHF usando <Controller> --- */}
+                <Controller
+                  name='role'
+                  control={control}
+                  render={({ field }) => (
+                    <ToggleButtonGroup
+                      value={field.value}
+                      exclusive
+                      onChange={(e, newRole) =>
+                        newRole !== null && field.onChange(newRole)
+                      }
+                      fullWidth
+                    >
+                      <ToggleButton value={Role.User}>Asistente</ToggleButton>
+                      <ToggleButton value={Role.Organizer}>
+                        Organizador
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  )}
+                />
               </Box>
             )}
 
@@ -152,10 +155,16 @@ const SignUp: FunctionComponent = () => {
               required
               margin='normal'
               label='Email'
-              name='email'
               type='email'
-              value={formData.email}
-              onChange={handleFormChange}
+              {...registerForm('email', {
+                required: 'El email es obligatorio',
+                pattern: {
+                  value: /^\S+@\S+$/i,
+                  message: 'Formato de email incorrecto'
+                }
+              })}
+              error={!!errors.email}
+              helperText={errors.email?.message}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
@@ -170,10 +179,16 @@ const SignUp: FunctionComponent = () => {
               required
               margin='normal'
               label='Contraseña'
-              name='password'
               type={showPassword ? 'text' : 'password'}
-              value={formData.password}
-              onChange={handleFormChange}
+              {...registerForm('password', {
+                required: 'La contraseña es obligatoria',
+                minLength: {
+                  value: 8,
+                  message: 'La contraseña debe tener al menos 8 caracteres'
+                }
+              })}
+              error={!!errors.password}
+              helperText={errors.password?.message}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
@@ -205,9 +220,11 @@ const SignUp: FunctionComponent = () => {
                     required={!isLogin}
                     margin='normal'
                     label='Nombre'
-                    name='first_name'
-                    value={formData.first_name}
-                    onChange={handleFormChange}
+                    {...registerForm('first_name', {
+                      required: 'El nombre es obligatorio'
+                    })}
+                    error={!!errors.first_name}
+                    helperText={errors.first_name?.message}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position='start'>
@@ -223,9 +240,11 @@ const SignUp: FunctionComponent = () => {
                     required={!isLogin}
                     margin='normal'
                     label='Apellidos'
-                    name='last_name'
-                    value={formData.last_name}
-                    onChange={handleFormChange}
+                    {...registerForm('last_name', {
+                      required: 'Los apellidos son obligatorios'
+                    })}
+                    error={!!errors.last_name}
+                    helperText={errors.last_name?.message}
                   />
                 </Grid>
               </Grid>
@@ -238,9 +257,14 @@ const SignUp: FunctionComponent = () => {
                 required={!isLogin && role === Role.Organizer}
                 margin='normal'
                 label='Nombre de la Organización'
-                name='organization_name'
-                value={formData.organization_name}
-                onChange={handleFormChange}
+                {...registerForm('organization_name', {
+                  required:
+                    role === Role.Organizer
+                      ? 'El nombre de la organización es obligatorio'
+                      : false
+                })}
+                error={!!errors.organization_name}
+                helperText={errors.organization_name?.message}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>
@@ -253,10 +277,8 @@ const SignUp: FunctionComponent = () => {
                 fullWidth
                 margin='normal'
                 label='Sitio Web (Opcional)'
-                name='organization_website'
                 type='url'
-                value={formData.organization_website}
-                onChange={handleFormChange}
+                {...registerForm('organization_website')}
               />
             </Collapse>
 

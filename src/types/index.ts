@@ -74,6 +74,7 @@ export interface Event {
   venue_name?: string
   venue_address?: string
   venue_city?: string
+  venue_community?: string // <-- CAMBIO: Añadido
   venue_country?: string
   latitude?: number
   longitude?: number
