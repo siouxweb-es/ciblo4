@@ -221,7 +221,8 @@ const SignUp: FunctionComponent = () => {
                     margin='normal'
                     label='Nombre'
                     {...registerForm('first_name', {
-                      required: 'El nombre es obligatorio'
+                      // <-- CORRECCIÓN: La validación 'required' ahora es condicional
+                      required: !isLogin ? 'El nombre es obligatorio' : false
                     })}
                     error={!!errors.first_name}
                     helperText={errors.first_name?.message}
@@ -241,7 +242,10 @@ const SignUp: FunctionComponent = () => {
                     margin='normal'
                     label='Apellidos'
                     {...registerForm('last_name', {
-                      required: 'Los apellidos son obligatorios'
+                      // <-- CORRECCIÓN: La validación 'required' ahora es condicional
+                      required: !isLogin
+                        ? 'Los apellidos son obligatorios'
+                        : false
                     })}
                     error={!!errors.last_name}
                     helperText={errors.last_name?.message}
