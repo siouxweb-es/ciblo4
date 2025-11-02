@@ -8,14 +8,14 @@ import { type ISourceOptions } from 'tsparticles-engine'
 export const DynamicBackground: React.FunctionComponent = () => {
   const options: ISourceOptions = useMemo(
     () => ({
-      // Mantenemos el fondo blanco que definimos en el paso anterior
+      // Mantenemos el fondo blanco que definimos antes
       background: {
         color: {
           value: '#ffffff' // var(--White)
         }
       },
+      // Mantenemos los colores visibles
       particles: {
-        // Mantenemos los colores que se ven sobre blanco
         color: {
           value: '#4fbac8' // var(--color-cadetblue)
         },
@@ -26,7 +26,6 @@ export const DynamicBackground: React.FunctionComponent = () => {
           opacity: 0.4,
           width: 1
         },
-        // ... (resto de opciones de particles sin cambios) ...
         move: {
           direction: 'none',
           enable: true,
@@ -79,11 +78,11 @@ export const DynamicBackground: React.FunctionComponent = () => {
       init={init}
       options={options}
       style={{
-        position: 'absolute',
+        position: 'fixed', // <-- CAMBIADO DE 'absolute' A 'fixed'
         top: 0,
         left: 0,
-        width: '100%', // 100% del ancho está bien
-        height: '100vh', // <-- CAMBIADO DE '100%' A '100vh'
+        width: '100%',
+        height: '100%', // 100% (del viewport) funciona con 'fixed'
         zIndex: 0
       }}
     />
