@@ -24,7 +24,6 @@ import PanelDeUsuario from './pages/PanelDeUsuario'
 import PanelDeOrganizador from './pages/PanelDeOrganizador'
 import Page from './pages/Page'
 import ErrorPage from './pages/ErrorPage'
-import { DynamicBackground } from './components/DynamicBackground' // <-- 1. IMPORTAR
 
 import {
   CssBaseline,
@@ -78,7 +77,6 @@ const AppWrapper = () => {
 
   return (
     <AuthProvider>
-      <DynamicBackground /> {/* <-- 2. AÑADIR FUERA DEL LAYOUT */}
       <Layout>
         <Outlet />
       </Layout>
