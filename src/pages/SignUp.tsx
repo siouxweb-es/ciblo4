@@ -1,12 +1,37 @@
 // src/pages/SignUp.tsx
 import { FunctionComponent, useState } from 'react'
 import { useForm, SubmitHandler, Controller } from 'react-hook-form'
-// ... (imports se mantienen) ...
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
+  InputAdornment,
+  IconButton,
+  CircularProgress,
+  Divider,
+  ToggleButtonGroup,
+  ToggleButton,
+  Collapse,
+  Grid,
+  Alert
+} from '@mui/material'
+import { useNavigate } from 'react-router-dom' // <-- Importación (ya estaba)
+import { useAuth } from '../context/AuthContext'
+import { Role, RegisterDTO } from '../types'
+import MailOutlineIcon from '@mui/icons-material/MailOutline'
+import LockIcon from '@mui/icons-material/Lock'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import PersonIcon from '@mui/icons-material/Person'
 import BusinessIcon from '@mui/icons-material/Business'
 
 const SignUp: FunctionComponent = () => {
-  // ... (toda la lógica de react-hook-form se mantiene igual) ...
+  // --- ARREGLO DEL CRASH ---
+  // Esta línea faltaba en mi código anterior, ¡mil disculpas!
   const navigate = useNavigate()
+  // --- FIN DEL ARREGLO ---
+
   const { login, register } = useAuth()
   const [isLogin, setIsLogin] = useState(true)
 
@@ -76,10 +101,10 @@ const SignUp: FunctionComponent = () => {
           item
           size={{ xs: 12, md: 5 }}
           sx={{
-            // --- GRADIENTE MODIFICADO ---
-            background: 'var(--gradient-header-footer)',
-            // --- FIN MODIFICACIÓN ---
-            color: 'var(--Gray-700)', // <-- Texto oscuro para fondo claro
+            // --- CAMBIO DE COLOR ---
+            background: 'var(--gradient-header-footer)', // <-- Tu gradiente
+            color: 'var(--Gray-700)', // <-- Texto oscuro
+            // --- FIN CAMBIO DE COLOR ---
             p: 4,
             display: 'flex',
             flexDirection: 'column',
@@ -90,6 +115,8 @@ const SignUp: FunctionComponent = () => {
             {isLogin ? '¡Bienvenido de vuelta!' : 'Únete a la Comunidad'}
           </Typography>
           <Typography sx={{ mt: 2, color: 'var(--Gray-500)' }}>
+            {' '}
+            {/* Texto secundario */}
             {isLogin
               ? 'Inicia sesión para acceder a tu panel y gestionar tus eventos.'
               : 'Regístrate para descubrir, participar y organizar los mejores eventos de ciberseguridad.'}
@@ -97,7 +124,6 @@ const SignUp: FunctionComponent = () => {
         </Grid>
 
         <Grid item size={{ xs: 12, md: 7 }} sx={{ p: 4, background: 'white' }}>
-          {/* ... (El resto del formulario se mantiene 100% igual) ... */}
           <Typography variant='h5' fontWeight='bold' mb={2}>
             {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
           </Typography>

@@ -19,12 +19,14 @@ export const Header: FunctionComponent = () => {
       setIsScrolled(window.scrollY > 50)
     }
 
-    // Solo escuchamos el scroll en la Landing Page
     if (isLandingPage) {
+      // Si es Landing, escucha el scroll
       window.addEventListener('scroll', handleScroll)
       handleScroll() // Comprobar estado inicial al cargar
     } else {
-      // Si no es la landing, el header está "scroll" por defecto
+      // --- ARREGLO IMPORTANTE ---
+      // Si NO es Landing, forzamos el estado "scroll"
+      // para que SIEMPRE tenga el fondo y la curva.
       setIsScrolled(true)
     }
 
@@ -48,7 +50,8 @@ export const Header: FunctionComponent = () => {
 
   // 3. La forma curva SÓLO se aplica si NO es transparente
   const clipPathStyle = isTransparent ? 'none' : 'ellipse(100% 60% at 50% 40%)'
-  const paddingBottom = isTransparent ? '16px' : { xs: '24px', md: '40px' } // Más padding cuando está curvo
+  // 4. Padding dinámico: 16px si es plano, más si es curvo
+  const paddingBottom = isTransparent ? '16px' : { xs: '24px', md: '40px' }
 
   const onLogoClick = useCallback(() => {
     navigate('/')
@@ -79,7 +82,7 @@ export const Header: FunctionComponent = () => {
         display: 'flex',
         justifyContent: 'center',
         transition:
-          'background-color 0.3s ease, box-shadow 0.3s ease, padding-bottom 0.3s ease',
+          'background-color 0.3s ease, box-shadow 0.3s ease, padding-bottom 0.3s ease, clip-path 0.3s ease',
         // --- ESTILOS DINÁMICOS ---
         clipPath: clipPathStyle,
         pt: '16px', // Padding superior fijo

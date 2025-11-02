@@ -15,7 +15,7 @@ export const Footer: FunctionComponent = () => {
         mt: 'auto',
         // --- NUEVA FORMA ---
         // Esto crea una curva hacia ARRIBA en el borde superior
-        clipPath: 'ellipse(150% 80% at 50% 100%)',
+        clipPath: 'ellipse(150% 85% at 50% 100%)',
         // Damos padding para que el contenido no se corte
         pt: { xs: 8, md: 10 },
         pb: 6
