@@ -15,43 +15,33 @@ export const Header: FunctionComponent = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Si el scroll es > 50px, se activa el header
       setIsScrolled(window.scrollY > 50)
     }
 
     if (isLandingPage) {
-      // Si es Landing, escucha el scroll
       window.addEventListener('scroll', handleScroll)
-      handleScroll() // Comprobar estado inicial al cargar
+      handleScroll()
     } else {
-      // --- ARREGLO IMPORTANTE ---
-      // Si NO es Landing, forzamos el estado "scroll"
-      // para que SIEMPRE tenga el fondo y la curva.
+      // Si no es la landing, el header es blanco por defecto
       setIsScrolled(true)
     }
 
     return () => {
       window.removeEventListener('scroll', handleScroll)
     }
-    // Se re-ejecuta cada vez que cambiamos de página
   }, [isLandingPage, location.pathname])
 
-  // --- LÓGICA HÍBRIDA ---
-  // 1. ¿Es transparente? Solo si es Landing Y no se ha hecho scroll.
-  const isTransparent = isLandingPage && !isScrolled
+  // --- LÓGICA REVERTIDA ---
+  // Vuelve a ser 'transparent' o 'var(--White)'
+  const headerBackground =
+    !isLandingPage || isScrolled ? 'var(--White)' : 'transparent'
+  const headerShadow =
+    !isLandingPage || isScrolled ? 'var(--shadow-header)' : 'none'
 
-  // 2. Definir estilos basados en si es transparente o no
-  const headerBackground = isTransparent
-    ? 'transparent'
-    : 'var(--gradient-header-footer)'
-  const headerShadow = isTransparent ? 'none' : 'var(--shadow-header)'
-  const textColor = 'var(--Gray-700)' // Siempre oscuro (fondo claro)
+  // Color oscuro para que se lea sobre el fondo claro del Hero
+  const textColor = 'var(--Gray-700)'
   const buttonColor = 'var(--gradient-button-primary)'
-
-  // 3. La forma curva SÓLO se aplica si NO es transparente
-  const clipPathStyle = isTransparent ? 'none' : 'ellipse(100% 60% at 50% 40%)'
-  // 4. Padding dinámico: 16px si es plano, más si es curvo
-  const paddingBottom = isTransparent ? '16px' : { xs: '24px', md: '40px' }
+  const buttonBorderColor = 'var(--color-cadetblue)'
 
   const onLogoClick = useCallback(() => {
     navigate('/')
@@ -74,19 +64,14 @@ export const Header: FunctionComponent = () => {
       component='header'
       sx={{
         width: '100%',
-        backgroundColor: headerBackground,
-        boxShadow: headerShadow,
+        backgroundColor: headerBackground, // Fondo dinámico (blanco o trans)
+        boxShadow: headerShadow, // Sombra dinámica
         position: 'fixed',
         top: 0,
         zIndex: 1100,
         display: 'flex',
         justifyContent: 'center',
-        transition:
-          'background-color 0.3s ease, box-shadow 0.3s ease, padding-bottom 0.3s ease, clip-path 0.3s ease',
-        // --- ESTILOS DINÁMICOS ---
-        clipPath: clipPathStyle,
-        pt: '16px', // Padding superior fijo
-        pb: paddingBottom // Padding inferior dinámico
+        transition: 'background-color 0.3s ease, box-shadow 0.3s ease' // Transición simple
       }}
     >
       <Box
@@ -96,7 +81,7 @@ export const Header: FunctionComponent = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 32px', // Padding horizontal
+          padding: '16px 32px', // Padding simple
           boxSizing: 'border-box'
         }}
       >
@@ -108,7 +93,7 @@ export const Header: FunctionComponent = () => {
             cursor: 'pointer'
           }}
           alt='CibESphere Logo'
-          src='/cyberLogo-1@2x.png' // Logo con texto
+          src='/cyberLogo-1@2x.png' // <-- Tu logo
           onClick={onLogoClick}
         />
 
@@ -139,7 +124,7 @@ export const Header: FunctionComponent = () => {
                 onClick={logout}
                 sx={{
                   borderRadius: '25px',
-                  borderColor: buttonColor,
+                  borderColor: buttonBorderColor,
                   color: buttonColor,
                   '&:hover': {
                     borderColor: buttonColor,
