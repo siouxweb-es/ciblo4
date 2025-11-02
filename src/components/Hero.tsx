@@ -15,8 +15,7 @@ export const Hero: FunctionComponent = () => {
         pt: { xs: 8, md: 16 }, // Padding superior para dejar espacio al Header transparente
         pb: { xs: 8, md: 16 }, // Padding inferior
         // Este es el degradado de fondo de tu diseño de Figma
-        background:
-          'linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 40%, #80DEEA 100%)',
+        background: 'var(--gradient-header-footer)',
         // Efecto de onda sutil en la parte inferior
         clipPath: 'ellipse(100% 60% at 50% 40%)'
       }}

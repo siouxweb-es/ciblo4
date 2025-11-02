@@ -1,48 +1,48 @@
 // src/components/Header.tsx
-import { FunctionComponent, useCallback, useState, useEffect } from 'react' // <-- Añadido useState y useEffect
+import { FunctionComponent, useCallback, useState, useEffect } from 'react'
 import { Box, Button, CircularProgress, Typography } from '@mui/material'
-import { useNavigate, useLocation } from 'react-router-dom' // <-- Añadido useLocation
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Role } from '../types'
 
 export const Header: FunctionComponent = () => {
   const navigate = useNavigate()
-  const location = useLocation() // Para saber en qué página estamos
+  const location = useLocation()
   const { isAuthenticated, user, logout, isLoading } = useAuth()
 
-  // --- LÓGICA DE HEADER TRANSPARENTE ---
   const [isScrolled, setIsScrolled] = useState(false)
-
-  // Solo queremos que el header sea transparente en la Landing Page ('/')
   const isLandingPage = location.pathname === '/'
 
   useEffect(() => {
     const handleScroll = () => {
-      // Si el scroll es > 50px, ponemos el fondo blanco
       setIsScrolled(window.scrollY > 50)
     }
 
     if (isLandingPage) {
-      // Solo escucha el scroll si estamos en la Landing
       window.addEventListener('scroll', handleScroll)
-      // Comprobación inicial por si la página carga con scroll
       handleScroll()
     }
 
-    // Limpieza del listener
     return () => {
       window.removeEventListener('scroll', handleScroll)
     }
-  }, [isLandingPage]) // Se re-ejecuta si cambiamos de página
+  }, [isLandingPage])
 
-  // Determinamos el fondo:
-  // - Si NO es la landing, fondo blanco siempre.
-  // - Si ES la landing, fondo transparente HASTA hacer scroll.
+  // --- LÓGICA DE FONDO MODIFICADA ---
+  // Ahora usa el gradiente en lugar de blanco
   const headerBackground =
-    !isLandingPage || isScrolled ? 'var(--White)' : 'transparent'
+    !isLandingPage || isScrolled
+      ? 'var(--gradient-header-footer)'
+      : 'transparent'
   const headerShadow =
     !isLandingPage || isScrolled ? 'var(--shadow-header)' : 'none'
-  // --- FIN LÓGICA ---
+
+  // --- LÓGICA DE COLOR CORREGIDA ---
+  // El texto siempre es oscuro, ya que ambos fondos (transparente sobre hero claro, y gradiente claro) son claros.
+  const textColor = 'var(--Gray-700)' // Siempre texto oscuro
+  const buttonBorderColor = 'var(--gradient-button-primary)'
+  const buttonColor = 'var(--gradient-button-primary)'
+  // --- FIN LÓGICA DE COLOR ---
 
   const onLogoClick = useCallback(() => {
     navigate('/')
@@ -52,7 +52,6 @@ export const Header: FunctionComponent = () => {
     navigate('/loginsign-up')
   }, [navigate])
 
-  // ... (onPanelClick se mantiene igual) ...
   const onPanelClick = useCallback(() => {
     if (user?.role === Role.Organizer || user?.role === Role.Admin) {
       navigate('/panel-de-organizador')
@@ -66,55 +65,66 @@ export const Header: FunctionComponent = () => {
       component='header'
       sx={{
         width: '100%',
-        // --- ESTILOS MODIFICADOS ---
         backgroundColor: headerBackground,
         boxShadow: headerShadow,
-        position: 'fixed', // <-- CAMBIO: De 'sticky' a 'fixed' para la transparencia
-        // --- FIN ESTILOS MODIFICADOS ---
+        position: 'fixed',
         top: 0,
         zIndex: 1100,
         display: 'flex',
         justifyContent: 'center',
-        transition: 'background-color 0.3s ease, box-shadow 0.3s ease' // Animación suave
+        transition: 'background-color 0.3s ease, box-shadow 0.3s ease'
       }}
     >
       <Box
         sx={{
           width: '100%',
           maxWidth: 1440,
-          // ... (resto de estilos del Box interno se mantienen) ...
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           padding: '16px 32px',
           boxSizing: 'border-box'
         }}
       >
+        {/* --- LOGO AÑADIDO (EL QUE PEDISTE) --- */}
         <img
-        // ... (img del logo se mantiene igual) ...
+          style={{
+            height: '48px',
+            width: '180px',
+            objectFit: 'contain',
+            cursor: 'pointer'
+          }}
+          alt='CibESphere Logo'
+          src='/cyberLogo-1@2x.png' // <-- Usando el logo de globe + text
+          onClick={onLogoClick}
         />
+        {/* --- FIN LOGO AÑADIDO --- */}
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {isLoading ? (
             <CircularProgress size={24} />
           ) : isAuthenticated ? (
             <>
-              {/* --- ESTILO MODIFICADO --- */}
               <Typography
                 sx={{
-                  // Color de texto: Blanco si es transparente, Negro si tiene fondo
-                  color:
-                    headerBackground === 'transparent'
-                      ? 'var(--White)'
-                      : 'var(--Black)',
+                  color: textColor, // Color oscuro
                   fontWeight: 500,
                   transition: 'color 0.3s ease'
                 }}
               >
                 Hola, {user?.first_name || user?.email}
               </Typography>
-              {/* --- FIN ESTILO MODIFICADO --- */}
               <Button
                 variant='contained'
                 onClick={onPanelClick}
-                // ... (estilos del botón Mi Panel se mantienen) ...
+                sx={{
+                  borderRadius: '25px',
+                  background: 'var(--gradient-button-primary)', // Botón principal siempre azul
+                  color: 'var(--White)',
+                  '&:hover': {
+                    background: 'var(--gradient-button-primary-hover)'
+                  }
+                }}
               >
                 Mi Panel
               </Button>
@@ -123,38 +133,30 @@ export const Header: FunctionComponent = () => {
                 onClick={logout}
                 sx={{
                   borderRadius: '25px',
-                  // --- ESTILO MODIFICADO ---
-                  // Estilo del botón "Cerrar Sesión" (Outlined)
-                  borderColor:
-                    headerBackground === 'transparent'
-                      ? 'var(--White)'
-                      : 'var(--color-cadetblue)',
-                  color:
-                    headerBackground === 'transparent'
-                      ? 'var(--White)'
-                      : 'var(--color-cadetblue)',
+                  borderColor: buttonBorderColor, // Color de borde oscuro
+                  color: buttonColor, // Color de texto oscuro
                   '&:hover': {
-                    borderColor:
-                      headerBackground === 'transparent'
-                        ? 'var(--White)'
-                        : 'var(--color-cadetblue)',
-                    backgroundColor:
-                      headerBackground === 'transparent'
-                        ? 'rgba(255, 255, 255, 0.1)'
-                        : 'rgba(79, 186, 200, 0.1)'
+                    borderColor: buttonColor,
+                    backgroundColor: 'rgba(79, 186, 200, 0.1)'
                   }
-                  // --- FIN ESTILO MODIFICADO ---
                 }}
               >
                 Cerrar Sesión
               </Button>
             </>
           ) : (
-            // El botón de "Login / Sign Up" (Contained) se mantiene igual
+            // Botón de "Login / Sign Up" (Contained)
             <Button
               variant='contained'
               onClick={onLoginClick}
-              // ... (estilos del botón Login se mantienen) ...
+              sx={{
+                borderRadius: '25px',
+                background: 'var(--gradient-button-primary)',
+                color: 'var(--White)',
+                '&:hover': {
+                  background: 'var(--gradient-button-primary-hover)'
+                }
+              }}
             >
               Login / Sign Up
             </Button>

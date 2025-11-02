@@ -1,8 +1,7 @@
 // src/components/Footer.tsx
-// Sin cambios significativos en la lógica. Se mantiene el código original,
-// pero se refactoriza para usar componentes y `sx` prop de MUI para mayor consistencia.
 import { FunctionComponent } from 'react'
-import { Box, Typography, Link, Divider } from '@mui/material'
+import { Box, Typography, Link as MuiLink, Container } from '@mui/material'
+import { Link as RouterLink } from 'react-router-dom' // Para enlaces internos
 
 export const Footer: FunctionComponent = () => {
   return (
@@ -10,45 +9,73 @@ export const Footer: FunctionComponent = () => {
       component='footer'
       sx={{
         width: '100%',
-        backgroundColor: 'var(--color-gray-100)',
-        color: 'var(--Gray-500)',
+        background: 'var(--gradient-header-footer)', // <-- NUEVO GRADIENTE
+        color: 'var(--Gray-700)', // Texto oscuro sobre fondo claro
         fontFamily: 'Inter, sans-serif',
         mt: 'auto', // Empuja el footer al fondo
-        pt: 8,
-        pb: 6,
-        px: 3,
-        display: 'flex',
-        justifyContent: 'center'
+        pt: 6,
+        pb: 6
       }}
     >
-      <Box sx={{ width: '100%', maxWidth: 1280 }}>
-        <Divider sx={{ mb: 4 }} />
+      <Container
+        maxWidth='lg'
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 3
+        }}
+      >
+        {/* 1. Logo (el mismo del header) */}
+        <img
+          style={{
+            height: '48px',
+            width: '180px',
+            objectFit: 'contain'
+          }}
+          alt='CibESphere Logo'
+          src='/cyberLogo-1@2x.png'
+        />
+
+        {/* 2. Enlaces (como en tu imagen) */}
         <Box
           sx={{
             display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 2
+            gap: 4,
+            textAlign: { xs: 'center', md: 'left' }
           }}
         >
-          <Typography variant='body2' color='text.secondary'>
-            © {new Date().getFullYear()} CibESphere. Todos los derechos
-            reservados.
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 3 }}>
-            <Link href='#' color='inherit' underline='hover'>
-              Política de Privacidad
-            </Link>
-            <Link href='#' color='inherit' underline='hover'>
-              Términos de Servicio
-            </Link>
-            <Link href='#' color='inherit' underline='hover'>
-              Contacto
-            </Link>
-          </Box>
+          <MuiLink
+            component={RouterLink}
+            to='/#sobre-nosotros' // Placeholder
+            color='inherit'
+            underline='hover'
+            sx={{ fontWeight: 500 }}
+          >
+            Sobre nosotros
+          </MuiLink>
+          <MuiLink
+            component={RouterLink}
+            to='/' // Enlace a Eventos (Landing)
+            color='inherit'
+            underline='hover'
+            sx={{ fontWeight: 500 }}
+          >
+            Eventos
+          </MuiLink>
         </Box>
-      </Box>
+
+        {/* 3. Copyright (como en tu imagen) */}
+        <Typography
+          variant='body2'
+          color='var(--Gray-700)'
+          sx={{ textAlign: { xs: 'center', md: 'right' } }}
+        >
+          © {new Date().getFullYear()} CibESphere. Todos los derechos
+          reservados.
+        </Typography>
+      </Container>
     </Box>
   )
 }

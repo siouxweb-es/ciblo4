@@ -145,6 +145,14 @@ body {
   --gradient-button-primary: linear-gradient(225deg, #00d9ff, #01c0fa);
   --gradient-button-primary-hover: linear-gradient(225deg, #00d1e0, #00a7d1);
 
+  /* --- NUEVO: Gradiente para Header y Footer --- */
+  --gradient-header-footer: linear-gradient(
+    135deg,
+    #e0f7fa 0%,
+    #b2ebf2 40%,
+    #80deea 100%
+  );
+
   /* WidthHeights */
   --height-1: 1px;
   --height-24: 24px;
