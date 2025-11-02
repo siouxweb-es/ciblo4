@@ -20,7 +20,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       sx={{
         width: '100%',
         position: 'relative',
-        backgroundColor: 'var(--White)', // <-- 1. DEVOLVER EL FONDO BLANCO
         overflowX: 'hidden',
         display: 'flex',
         flexDirection: 'column',
