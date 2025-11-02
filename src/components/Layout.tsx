@@ -3,14 +3,16 @@ import React, { ReactNode } from 'react'
 import { Box } from '@mui/material'
 import { Header } from './Header'
 import { Footer } from './Footer'
-import { Outlet, useNavigation } from 'react-router-dom'
+import { Outlet, useNavigation, useLocation } from 'react-router-dom' // <-- Añadido useLocation
 
 interface LayoutProps {
-  children?: ReactNode // Hacemos children opcional ya que usaremos Outlet
+  children?: ReactNode
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigation = useNavigation()
+  const location = useLocation() // <-- Añadido
+  const isLandingPage = location.pathname === '/' // <-- Añadido
 
   return (
     <Box
@@ -36,12 +38,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          // Añadimos un efecto de opacidad durante la navegación de carga de datos
           opacity: navigation.state === 'loading' ? 0.7 : 1,
-          transition: 'opacity 0.2s ease-in-out'
+          transition: 'opacity 0.2s ease-in-out',
+          // --- MODIFICADO: Solo empuja hacia abajo si NO es la Landing Page ---
+          mt: isLandingPage ? 0 : '80px'
         }}
       >
-        {/* --- CORREGIDO: De '| |' a '||' --- */}
         {children || <Outlet />}
       </Box>
       <Footer />

@@ -1,49 +1,56 @@
 // src/pages/LandingPage.tsx
-import { FunctionComponent } from 'react' // No necesitamos useState
+import { FunctionComponent } from 'react'
 import {
   Box,
   Typography,
   Container,
   Grid,
-  CircularProgress
+  CircularProgress,
+  Divider // <-- Añadido para separar
 } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { useLoaderData, useNavigation } from 'react-router-dom'
+import { Hero } from '../components/Hero' // <-- 1. IMPORTAR EL HERO
 import { EventMap } from '../components/EventMap'
 import { EventCard } from '../components/EventCard'
 import { Event, EventFilterParams } from '../types'
-// import * as apiService from '../services/apiService' // No se usa
 import { EventFilters } from '../components/EventFilters'
 
-// --- INTERFAZ DEL LOADER ---
 interface LandingLoaderData {
   events: Event[]
   filters: EventFilterParams
 }
 
 const LandingPage: FunctionComponent = () => {
-  // --- LÓGICA SIMPLIFICADA ---
   const { events, filters } = useLoaderData() as LandingLoaderData
   const navigation = useNavigation()
 
   const isLoading = navigation.state === 'loading'
-  // --- FIN LÓGICA SIMPLIFICADA ---
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
+      {/* 2. AÑADIR EL HERO AQUÍ (fuera del Container) */}
+      <Hero />
+
+      {/* El resto del contenido de la página */}
       <Container maxWidth='lg' sx={{ mt: 4, mb: 4 }}>
+        {/* Título de la sección de eventos */}
         <Typography
-          variant='h2'
-          component='h1'
+          variant='h3' // Un poco más pequeño que el del Hero
+          component='h2'
           gutterBottom
           align='center'
           fontWeight='bold'
+          sx={{ mt: 4, mb: 4 }}
         >
-          Próximos Eventos de Ciberseguridad
+          Próximos Eventos
         </Typography>
 
-        <EventFilters initialFilters={filters} />
+        {/* Damos un ID a los filtros para que el botón del Hero pueda "saltar" aquí */}
+        <Box id='filtros'>
+          <EventFilters initialFilters={filters} />
+        </Box>
 
         <Box sx={{ my: 5, display: 'flex', justifyContent: 'center' }}>
           <EventMap events={events} />
