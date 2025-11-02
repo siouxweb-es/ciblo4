@@ -2,8 +2,9 @@
 import { FunctionComponent } from 'react'
 import { Box, Typography, Container, Grid, Button } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-// Esta es la imagen del logo grande que tienes en /public
-import logoVertical from '/cyberLogo-gigapixel-art-scale-2-00x-godpix-1@2x.png'
+// --- LOGO MODIFICADO ---
+// Usando el nombre de archivo que me diste
+import logoVertical from '/Logo-Vertical.png'
 
 export const Hero: FunctionComponent = () => {
   const navigate = useNavigate()
@@ -12,11 +13,12 @@ export const Hero: FunctionComponent = () => {
     <Box
       sx={{
         width: '100%',
-        pt: { xs: 8, md: 16 }, // Padding superior para dejar espacio al Header transparente
-        pb: { xs: 8, md: 16 }, // Padding inferior
-        // Este es el degradado de fondo de tu diseño de Figma
+        // --- PADDING MODIFICADO ---
+        // 112px (altura del header) + 32px (espacio extra) = 144px
+        pt: { xs: '120px', md: '144px' },
+        pb: { xs: 8, md: 16 },
         background: 'var(--gradient-header-footer)',
-        // Efecto de onda sutil en la parte inferior
+        // La curva se mantiene para que coincida con el header
         clipPath: 'ellipse(100% 60% at 50% 40%)'
       }}
     >
@@ -35,7 +37,7 @@ export const Hero: FunctionComponent = () => {
           >
             <Box
               component='img'
-              src={logoVertical}
+              src={logoVertical} // <-- Logo nuevo
               alt='CibESphere Logo'
               sx={{
                 width: '100%',
@@ -45,7 +47,7 @@ export const Hero: FunctionComponent = () => {
             />
           </Grid>
 
-          {/* Columna Derecha: Texto */}
+          {/* Columna Derecha: Texto (sin cambios) */}
           <Grid
             item
             size={{ xs: 12, md: 7 }}

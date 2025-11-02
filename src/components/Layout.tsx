@@ -3,16 +3,19 @@ import React, { ReactNode } from 'react'
 import { Box } from '@mui/material'
 import { Header } from './Header'
 import { Footer } from './Footer'
-import { Outlet, useNavigation, useLocation } from 'react-router-dom' // <-- Añadido useLocation
+import { Outlet, useNavigation, useLocation } from 'react-router-dom'
 
 interface LayoutProps {
   children?: ReactNode
 }
 
+// Altura calculada del Header: 80px (base) + 32px (pb: 4) = 112px
+const HEADER_HEIGHT = '112px'
+
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigation = useNavigation()
-  const location = useLocation() // <-- Añadido
-  const isLandingPage = location.pathname === '/' // <-- Añadido
+  const location = useLocation()
+  const isLandingPage = location.pathname === '/'
 
   return (
     <Box
@@ -40,8 +43,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           alignItems: 'center',
           opacity: navigation.state === 'loading' ? 0.7 : 1,
           transition: 'opacity 0.2s ease-in-out',
-          // --- MODIFICADO: Solo empuja hacia abajo si NO es la Landing Page ---
-          mt: isLandingPage ? 0 : '80px'
+          // --- MODIFICADO: ---
+          // Si es la Landing, el Hero maneja el padding (mt: 0)
+          // Si es otra página, empujamos el contenido hacia abajo
+          mt: isLandingPage ? 0 : HEADER_HEIGHT
         }}
       >
         {children || <Outlet />}

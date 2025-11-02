@@ -1,48 +1,21 @@
 // src/components/Header.tsx
-import { FunctionComponent, useCallback, useState, useEffect } from 'react'
+import { FunctionComponent, useCallback } from 'react' // <-- Imports simplificados
 import { Box, Button, CircularProgress, Typography } from '@mui/material'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom' // <-- No necesitamos useLocation
 import { useAuth } from '../context/AuthContext'
 import { Role } from '../types'
 
 export const Header: FunctionComponent = () => {
   const navigate = useNavigate()
-  const location = useLocation()
   const { isAuthenticated, user, logout, isLoading } = useAuth()
 
-  const [isScrolled, setIsScrolled] = useState(false)
-  const isLandingPage = location.pathname === '/'
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
-
-    if (isLandingPage) {
-      window.addEventListener('scroll', handleScroll)
-      handleScroll()
-    }
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [isLandingPage])
-
-  // --- LÓGICA DE FONDO MODIFICADA ---
-  // Ahora usa el gradiente en lugar de blanco
-  const headerBackground =
-    !isLandingPage || isScrolled
-      ? 'var(--gradient-header-footer)'
-      : 'transparent'
-  const headerShadow =
-    !isLandingPage || isScrolled ? 'var(--shadow-header)' : 'none'
-
-  // --- LÓGICA DE COLOR CORREGIDA ---
-  // El texto siempre es oscuro, ya que ambos fondos (transparente sobre hero claro, y gradiente claro) son claros.
+  // --- LÓGICA DE HEADER SIMPLIFICADA ---
+  // El header ahora es fijo, curvo y siempre tiene el gradiente
+  const headerBackground = 'var(--gradient-header-footer)'
+  const headerShadow = 'var(--shadow-header)'
   const textColor = 'var(--Gray-700)' // Siempre texto oscuro
-  const buttonBorderColor = 'var(--gradient-button-primary)'
   const buttonColor = 'var(--gradient-button-primary)'
-  // --- FIN LÓGICA DE COLOR ---
+  // --- FIN LÓGICA ---
 
   const onLogoClick = useCallback(() => {
     navigate('/')
@@ -65,14 +38,17 @@ export const Header: FunctionComponent = () => {
       component='header'
       sx={{
         width: '100%',
-        backgroundColor: headerBackground,
-        boxShadow: headerShadow,
+        backgroundColor: headerBackground, // <-- Fondo de gradiente
+        boxShadow: headerShadow, // <-- Sombra
         position: 'fixed',
         top: 0,
         zIndex: 1100,
         display: 'flex',
         justifyContent: 'center',
-        transition: 'background-color 0.3s ease, box-shadow 0.3s ease'
+        // --- NUEVA FORMA ---
+        clipPath: 'ellipse(100% 60% at 50% 40%)', // Misma curva que el Hero
+        pb: 4 // Padding inferior para dar espacio a la curva
+        // --- FIN NUEVA FORMA ---
       }}
     >
       <Box
@@ -82,11 +58,11 @@ export const Header: FunctionComponent = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '16px 32px',
+          padding: '16px 32px 0', // Padding inferior quitado (se usa pb en el Box padre)
           boxSizing: 'border-box'
         }}
       >
-        {/* --- LOGO AÑADIDO (EL QUE PEDISTE) --- */}
+        {/* --- LOGO RESTAURADO --- */}
         <img
           style={{
             height: '48px',
@@ -95,23 +71,17 @@ export const Header: FunctionComponent = () => {
             cursor: 'pointer'
           }}
           alt='CibESphere Logo'
-          src='/cyberLogo-1@2x.png' // <-- Usando el logo de globe + text
+          src='/cyberLogo-1@2x.png' // <-- El logo que pediste
           onClick={onLogoClick}
         />
-        {/* --- FIN LOGO AÑADIDO --- */}
+        {/* --- FIN LOGO RESTAURADO --- */}
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {isLoading ? (
             <CircularProgress size={24} />
           ) : isAuthenticated ? (
             <>
-              <Typography
-                sx={{
-                  color: textColor, // Color oscuro
-                  fontWeight: 500,
-                  transition: 'color 0.3s ease'
-                }}
-              >
+              <Typography sx={{ color: textColor, fontWeight: 500 }}>
                 Hola, {user?.first_name || user?.email}
               </Typography>
               <Button
@@ -119,7 +89,7 @@ export const Header: FunctionComponent = () => {
                 onClick={onPanelClick}
                 sx={{
                   borderRadius: '25px',
-                  background: 'var(--gradient-button-primary)', // Botón principal siempre azul
+                  background: 'var(--gradient-button-primary)',
                   color: 'var(--White)',
                   '&:hover': {
                     background: 'var(--gradient-button-primary-hover)'
@@ -133,8 +103,8 @@ export const Header: FunctionComponent = () => {
                 onClick={logout}
                 sx={{
                   borderRadius: '25px',
-                  borderColor: buttonBorderColor, // Color de borde oscuro
-                  color: buttonColor, // Color de texto oscuro
+                  borderColor: buttonColor,
+                  color: buttonColor,
                   '&:hover': {
                     borderColor: buttonColor,
                     backgroundColor: 'rgba(79, 186, 200, 0.1)'
@@ -145,7 +115,6 @@ export const Header: FunctionComponent = () => {
               </Button>
             </>
           ) : (
-            // Botón de "Login / Sign Up" (Contained)
             <Button
               variant='contained'
               onClick={onLoginClick}
