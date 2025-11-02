@@ -8,27 +8,25 @@ import { type ISourceOptions } from 'tsparticles-engine'
 export const DynamicBackground: React.FunctionComponent = () => {
   const options: ISourceOptions = useMemo(
     () => ({
-      // --- ¡AQUÍ ESTÁ EL CAMBIO! ---
-      // Le decimos a tsparticles que dibuje un fondo blanco.
+      // Mantenemos el fondo blanco que definimos en el paso anterior
       background: {
         color: {
           value: '#ffffff' // var(--White)
         }
       },
-      // --- FIN DEL CAMBIO ---
       particles: {
-        // Mantenemos el cian para los puntos
+        // Mantenemos los colores que se ven sobre blanco
         color: {
           value: '#4fbac8' // var(--color-cadetblue)
         },
         links: {
-          // Usamos el gris oscuro para las líneas
           color: '#717680', // var(--Gray-500)
           distance: 150,
           enable: true,
           opacity: 0.4,
           width: 1
         },
+        // ... (resto de opciones de particles sin cambios) ...
         move: {
           direction: 'none',
           enable: true,
@@ -74,7 +72,7 @@ export const DynamicBackground: React.FunctionComponent = () => {
     await loadSlim(engine)
   }, [])
 
-  // Mantenemos el style de posicionamiento
+  // --- ¡AQUÍ ESTÁ EL CAMBIO! ---
   return (
     <Particles
       id='tsparticles'
@@ -84,10 +82,11 @@ export const DynamicBackground: React.FunctionComponent = () => {
         position: 'absolute',
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: 0 // Se queda en la base del layout
+        width: '100%', // 100% del ancho está bien
+        height: '100vh', // <-- CAMBIADO DE '100%' A '100vh'
+        zIndex: 0
       }}
     />
   )
+  // --- FIN DEL CAMBIO ---
 }
