@@ -1,5 +1,5 @@
 // src/components/Layout.tsx
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useState, useEffect } from 'react' // Añadidos
 import { Box } from '@mui/material'
 import { Header } from './Header'
 import { Footer } from './Footer'
@@ -9,13 +9,44 @@ interface LayoutProps {
   children?: ReactNode
 }
 
-// Altura calculada del Header: 80px (base) + 32px (pb: 4) = 112px
-const HEADER_HEIGHT = '112px'
+// Alturas del Header
+const HEADER_HEIGHT_CURVED = '112px' // 80px + 32px pb
+const HEADER_HEIGHT_FLAT = '80px' // 80px + 0 pb
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigation = useNavigation()
   const location = useLocation()
+
+  // --- LÓGICA DE ALTURA DINÁMICA ---
+  const [headerHeight, setHeaderHeight] = useState(HEADER_HEIGHT_FLAT)
   const isLandingPage = location.pathname === '/'
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Si es la landing y hacemos scroll, la altura cambia
+      if (isLandingPage) {
+        setHeaderHeight(
+          window.scrollY > 50 ? HEADER_HEIGHT_CURVED : HEADER_HEIGHT_FLAT
+        )
+      } else {
+        // En otras páginas, siempre es curvo
+        setHeaderHeight(HEADER_HEIGHT_CURVED)
+      }
+    }
+
+    // Ejecutar la lógica al cargar y al cambiar de ruta
+    handleScroll()
+
+    // Escuchar el scroll SOLO en la landing
+    if (isLandingPage) {
+      window.addEventListener('scroll', handleScroll)
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [isLandingPage, location.pathname])
+  // --- FIN LÓGICA DE ALTURA ---
 
   return (
     <Box
@@ -43,10 +74,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           alignItems: 'center',
           opacity: navigation.state === 'loading' ? 0.7 : 1,
           transition: 'opacity 0.2s ease-in-out',
-          // --- MODIFICADO: ---
-          // Si es la Landing, el Hero maneja el padding (mt: 0)
-          // Si es otra página, empujamos el contenido hacia abajo
-          mt: isLandingPage ? 0 : HEADER_HEIGHT
+          // --- MODIFICADO: mt dinámico ---
+          // Si es la landing, el Hero maneja su propio padding (mt: 0)
+          // Si es otra página, empujamos el contenido con la altura CURVA
+          mt: isLandingPage ? 0 : headerHeight
         }}
       >
         {children || <Outlet />}

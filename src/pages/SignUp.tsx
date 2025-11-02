@@ -1,32 +1,11 @@
 // src/pages/SignUp.tsx
 import { FunctionComponent, useState } from 'react'
 import { useForm, SubmitHandler, Controller } from 'react-hook-form'
-import {
-  Box,
-  Typography,
-  Button,
-  TextField,
-  InputAdornment,
-  IconButton,
-  CircularProgress,
-  Divider,
-  ToggleButtonGroup,
-  ToggleButton,
-  Collapse,
-  Grid,
-  Alert
-} from '@mui/material'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { Role, RegisterDTO } from '../types'
-import MailOutlineIcon from '@mui/icons-material/MailOutline'
-import LockIcon from '@mui/icons-material/Lock'
-import VisibilityIcon from '@mui/icons-material/Visibility'
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
-import PersonIcon from '@mui/icons-material/Person'
+// ... (imports se mantienen) ...
 import BusinessIcon from '@mui/icons-material/Business'
 
 const SignUp: FunctionComponent = () => {
+  // ... (toda la lógica de react-hook-form se mantiene igual) ...
   const navigate = useNavigate()
   const { login, register } = useAuth()
   const [isLogin, setIsLogin] = useState(true)
@@ -35,12 +14,11 @@ const SignUp: FunctionComponent = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // --- NUEVO: Configuración de React Hook Form ---
   const {
     register: registerForm,
     handleSubmit,
-    control, // Para componentes controlados (MUI)
-    watch, // Para observar cambios (ej. el rol)
+    control,
+    watch,
     formState: { errors }
   } = useForm<RegisterDTO>({
     defaultValues: {
@@ -54,20 +32,16 @@ const SignUp: FunctionComponent = () => {
     }
   })
 
-  const role = watch('role') // Observamos el valor del rol
-  // --- FIN NUEVO ---
+  const role = watch('role')
 
-  // --- MODIFICADO: Esta es la lógica que se ejecuta al enviar ---
   const onSubmit: SubmitHandler<RegisterDTO> = async (data: RegisterDTO) => {
     setIsLoading(true)
     setError(null)
     try {
       if (isLogin) {
         await login(data.email, data.password)
-        // La redirección se maneja en AuthContext
       } else {
         await register(data)
-        // La redirección se maneja en AuthContext
       }
     } catch (err: any) {
       setError(err.message || 'Ha ocurrido un error.')
@@ -83,7 +57,7 @@ const SignUp: FunctionComponent = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: 'calc(100vh - 160px)', // Ajustar altura
+        minHeight: 'calc(100vh - 160px)',
         p: 3
       }}
     >
@@ -99,11 +73,13 @@ const SignUp: FunctionComponent = () => {
         }}
       >
         <Grid
-          item // Añadido 'item' por consistencia con MUI v5, aunque en v7 'size' es suficiente
+          item
           size={{ xs: 12, md: 5 }}
           sx={{
-            background: 'linear-gradient(180deg, #00c2ff, #019cfa)',
-            color: 'white',
+            // --- GRADIENTE MODIFICADO ---
+            background: 'var(--gradient-header-footer)',
+            // --- FIN MODIFICACIÓN ---
+            color: 'var(--Gray-700)', // <-- Texto oscuro para fondo claro
             p: 4,
             display: 'flex',
             flexDirection: 'column',
@@ -113,7 +89,7 @@ const SignUp: FunctionComponent = () => {
           <Typography variant='h4' fontWeight='bold'>
             {isLogin ? '¡Bienvenido de vuelta!' : 'Únete a la Comunidad'}
           </Typography>
-          <Typography sx={{ mt: 2 }}>
+          <Typography sx={{ mt: 2, color: 'var(--Gray-500)' }}>
             {isLogin
               ? 'Inicia sesión para acceder a tu panel y gestionar tus eventos.'
               : 'Regístrate para descubrir, participar y organizar los mejores eventos de ciberseguridad.'}
@@ -121,13 +97,13 @@ const SignUp: FunctionComponent = () => {
         </Grid>
 
         <Grid item size={{ xs: 12, md: 7 }} sx={{ p: 4, background: 'white' }}>
+          {/* ... (El resto del formulario se mantiene 100% igual) ... */}
           <Typography variant='h5' fontWeight='bold' mb={2}>
             {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
           </Typography>
           <Box component='form' onSubmit={handleSubmit(onSubmit)}>
             {!isLogin && (
               <Box mb={2}>
-                {/* --- MODIFICADO: Conectado con RHF usando <Controller> --- */}
                 <Controller
                   name='role'
                   control={control}
@@ -221,7 +197,6 @@ const SignUp: FunctionComponent = () => {
                     margin='normal'
                     label='Nombre'
                     {...registerForm('first_name', {
-                      // <-- CORRECCIÓN: La validación 'required' ahora es condicional
                       required: !isLogin ? 'El nombre es obligatorio' : false
                     })}
                     error={!!errors.first_name}
@@ -242,7 +217,6 @@ const SignUp: FunctionComponent = () => {
                     margin='normal'
                     label='Apellidos'
                     {...registerForm('last_name', {
-                      // <-- CORRECCIÓN: La validación 'required' ahora es condicional
                       required: !isLogin
                         ? 'Los apellidos son obligatorios'
                         : false

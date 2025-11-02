@@ -1,21 +1,54 @@
 // src/components/Header.tsx
-import { FunctionComponent, useCallback } from 'react' // <-- Imports simplificados
+import { FunctionComponent, useCallback, useState, useEffect } from 'react'
 import { Box, Button, CircularProgress, Typography } from '@mui/material'
-import { useNavigate } from 'react-router-dom' // <-- No necesitamos useLocation
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Role } from '../types'
 
 export const Header: FunctionComponent = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { isAuthenticated, user, logout, isLoading } = useAuth()
 
-  // --- LÓGICA DE HEADER SIMPLIFICADA ---
-  // El header ahora es fijo, curvo y siempre tiene el gradiente
-  const headerBackground = 'var(--gradient-header-footer)'
-  const headerShadow = 'var(--shadow-header)'
-  const textColor = 'var(--Gray-700)' // Siempre texto oscuro
+  const [isScrolled, setIsScrolled] = useState(false)
+  const isLandingPage = location.pathname === '/'
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Si el scroll es > 50px, se activa el header
+      setIsScrolled(window.scrollY > 50)
+    }
+
+    // Solo escuchamos el scroll en la Landing Page
+    if (isLandingPage) {
+      window.addEventListener('scroll', handleScroll)
+      handleScroll() // Comprobar estado inicial al cargar
+    } else {
+      // Si no es la landing, el header está "scroll" por defecto
+      setIsScrolled(true)
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+    // Se re-ejecuta cada vez que cambiamos de página
+  }, [isLandingPage, location.pathname])
+
+  // --- LÓGICA HÍBRIDA ---
+  // 1. ¿Es transparente? Solo si es Landing Y no se ha hecho scroll.
+  const isTransparent = isLandingPage && !isScrolled
+
+  // 2. Definir estilos basados en si es transparente o no
+  const headerBackground = isTransparent
+    ? 'transparent'
+    : 'var(--gradient-header-footer)'
+  const headerShadow = isTransparent ? 'none' : 'var(--shadow-header)'
+  const textColor = 'var(--Gray-700)' // Siempre oscuro (fondo claro)
   const buttonColor = 'var(--gradient-button-primary)'
-  // --- FIN LÓGICA ---
+
+  // 3. La forma curva SÓLO se aplica si NO es transparente
+  const clipPathStyle = isTransparent ? 'none' : 'ellipse(100% 60% at 50% 40%)'
+  const paddingBottom = isTransparent ? '16px' : { xs: '24px', md: '40px' } // Más padding cuando está curvo
 
   const onLogoClick = useCallback(() => {
     navigate('/')
@@ -38,17 +71,19 @@ export const Header: FunctionComponent = () => {
       component='header'
       sx={{
         width: '100%',
-        backgroundColor: headerBackground, // <-- Fondo de gradiente
-        boxShadow: headerShadow, // <-- Sombra
+        backgroundColor: headerBackground,
+        boxShadow: headerShadow,
         position: 'fixed',
         top: 0,
         zIndex: 1100,
         display: 'flex',
         justifyContent: 'center',
-        // --- NUEVA FORMA ---
-        clipPath: 'ellipse(100% 60% at 50% 40%)', // Misma curva que el Hero
-        pb: 4 // Padding inferior para dar espacio a la curva
-        // --- FIN NUEVA FORMA ---
+        transition:
+          'background-color 0.3s ease, box-shadow 0.3s ease, padding-bottom 0.3s ease',
+        // --- ESTILOS DINÁMICOS ---
+        clipPath: clipPathStyle,
+        pt: '16px', // Padding superior fijo
+        pb: paddingBottom // Padding inferior dinámico
       }}
     >
       <Box
@@ -58,11 +93,10 @@ export const Header: FunctionComponent = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '16px 32px 0', // Padding inferior quitado (se usa pb en el Box padre)
+          padding: '0 32px', // Padding horizontal
           boxSizing: 'border-box'
         }}
       >
-        {/* --- LOGO RESTAURADO --- */}
         <img
           style={{
             height: '48px',
@@ -71,10 +105,9 @@ export const Header: FunctionComponent = () => {
             cursor: 'pointer'
           }}
           alt='CibESphere Logo'
-          src='/cyberLogo-1@2x.png' // <-- El logo que pediste
+          src='/cyberLogo-1@2x.png' // Logo con texto
           onClick={onLogoClick}
         />
-        {/* --- FIN LOGO RESTAURADO --- */}
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {isLoading ? (
