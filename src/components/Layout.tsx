@@ -4,6 +4,7 @@ import { Box } from '@mui/material'
 import { Header } from './Header'
 import { Footer } from './Footer'
 import { Outlet, useNavigation, useLocation } from 'react-router-dom'
+import { DynamicBackground } from './DynamicBackground'
 
 interface LayoutProps {
   children?: ReactNode
@@ -19,7 +20,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       sx={{
         width: '100%',
         position: 'relative',
-        backgroundColor: 'var(--White)',
         overflowX: 'hidden',
         display: 'flex',
         flexDirection: 'column',
@@ -30,6 +30,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       }}
     >
       <Header />
+      <DynamicBackground />
       <Box
         component='main'
         sx={{
