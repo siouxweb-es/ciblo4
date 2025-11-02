@@ -1,9 +1,12 @@
 // src/components/DynamicBackground.tsx
 import React, { useMemo, useCallback } from 'react'
-import { Particles } from 'react-tsparticles'
+// --- CAMBIO IMPORTANTE ---
+import { Particles } from '@tsparticles/react'
+// --- FIN CAMBIO ---
 import { type Engine } from 'tsparticles-engine'
-// Importamos el bundle "slim" que incluye el efecto de líneas
-import { loadSlim } from 'tsparticles-slim'
+// --- CAMBIO IMPORTANTE ---
+import { loadSlim } from '@tsparticles/slim'
+// --- FIN CAMBIO ---
 import { type ISourceOptions } from 'tsparticles-engine'
 
 export const DynamicBackground: React.FunctionComponent = () => {
@@ -15,7 +18,7 @@ export const DynamicBackground: React.FunctionComponent = () => {
         enable: true,
         zIndex: -1 // <-- ¡Clave! Lo pone por detrás del contenido
       },
-      // El fondo del canvas en sí es transparente, para que se vea el fondo blanco del layout
+      // El fondo del canvas en sí es transparente
       background: {
         color: {
           value: 'transparent'
