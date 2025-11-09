@@ -35,6 +35,24 @@ export const Hero: FunctionComponent = () => {
               textAlign: { xs: 'center', md: 'left' }
             }}
           >
+            <style>
+              {`
+                @keyframes shine {
+                  0% {
+                    filter: drop-shadow(0 0 0px #fff) drop-shadow(0 0 0px #01c0fa);
+                  }
+                  40% {
+                    filter: drop-shadow(0 0 24px #fff) drop-shadow(0 0 12px #01c0fa);
+                  }
+                  60% {
+                    filter: drop-shadow(0 0 32px #fff) drop-shadow(0 0 24px #4fbac8);
+                  }
+                  100% {
+                    filter: drop-shadow(0 0 0px #fff) drop-shadow(0 0 0px #01c0fa);
+                  }
+                }
+              `}
+            </style>
             <Box
               component='img'
               src={logoVertical} // <-- Logo nuevo
@@ -42,7 +60,8 @@ export const Hero: FunctionComponent = () => {
               sx={{
                 width: '100%',
                 maxWidth: { xs: 250, md: 350 },
-                height: 'auto'
+                height: 'auto',
+                animation: 'shine 2.5s infinite'
               }}
             />
           </Grid>
@@ -57,7 +76,7 @@ export const Hero: FunctionComponent = () => {
               variant='h2'
               component='h1'
               fontWeight='bold'
-              sx={{ color: 'var(--Gray-700)', mb: 2 }}
+              sx={{ color: 'var(--Gray-700)', mb: 2, marginBottom: 10,}}
             >
               La web de referencia para eventos y congresos de Ciberseguridad
               más grande de España.
@@ -87,7 +106,8 @@ export const Hero: FunctionComponent = () => {
                   background: 'var(--gradient-button-primary-hover)'
                 },
                 px: 4,
-                py: 1.5
+                py: 1.5,
+                
               }}
             >
               Explorar Eventos

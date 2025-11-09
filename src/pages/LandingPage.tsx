@@ -16,6 +16,7 @@ import { EventMap } from '../components/EventMap'
 import { EventCard } from '../components/EventCard'
 import { Event, EventFilterParams } from '../types'
 import { EventFilters } from '../components/EventFilters'
+import ComunidadBox from '../components/AboutThis'
 
 interface LandingLoaderData {
   events: Event[]
@@ -35,6 +36,9 @@ const LandingPage: FunctionComponent = () => {
 
       {/* El resto del contenido de la página */}
       <Container maxWidth='lg' sx={{ mt: 4, mb: 4 }}>
+        {/* Box de comunidad antes de Próximos Eventos */}
+        <ComunidadBox />
+
         {/* Título de la sección de eventos */}
         <Typography
           variant='h3' // Un poco más pequeño que el del Hero
