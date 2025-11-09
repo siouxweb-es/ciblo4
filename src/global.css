@@ -1,6 +1,7 @@
 body {
   margin: 0;
   line-height: normal;
+  font-family: 'Satoshi', Arial, Helvetica, sans-serif;
 }
 
 :root {
@@ -13,6 +14,8 @@ body {
   --Gray-700: #414651;
   --White: #fff;
   --Black: #000;
+  --Event-2: #282828;
+  --Logo-2: #000306;
 
   /* --- Sombras Esenciales --- */
   --shadow-drop: 0px 0px 30px rgba(0, 0, 0, 0.25);
@@ -34,4 +37,83 @@ body {
     #b2ebf2 40%,
     #80deea 100%
   );
+
+  font-family: 'Satoshi', Arial, Helvetica, sans-serif;
 }
+
+/* --- Fuente Satoshi --- */
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/WEB/fonts/Satoshi-Regular.woff2') format('woff2'),
+       url('/fonts/WEB/fonts/Satoshi-Regular.woff') format('woff'),
+       url('/fonts/WEB/fonts/Satoshi-Regular.ttf') format('truetype'),
+       url('/fonts/WEB/fonts/Satoshi-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/WEB/fonts/Satoshi-Bold.woff2') format('woff2'),
+       url('/fonts/WEB/fonts/Satoshi-Bold.woff') format('woff'),
+       url('/fonts/WEB/fonts/Satoshi-Bold.ttf') format('truetype'),
+       url('/fonts/WEB/fonts/Satoshi-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/WEB/fonts/Satoshi-Medium.woff2') format('woff2'),
+       url('/fonts/WEB/fonts/Satoshi-Medium.woff') format('woff'),
+       url('/fonts/WEB/fonts/Satoshi-Medium.ttf') format('truetype'),
+       url('/fonts/WEB/fonts/Satoshi-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/WEB/fonts/Satoshi-Black.woff2') format('woff2'),
+       url('/fonts/WEB/fonts/Satoshi-Black.woff') format('woff'),
+       url('/fonts/WEB/fonts/Satoshi-Black.ttf') format('truetype'),
+       url('/fonts/WEB/fonts/Satoshi-Black.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+body,
+html,
+:root,
+* {
+  font-family: 'Satoshi', Arial, Helvetica, sans-serif !important;
+}
+
+/* Logo de evento 50% más pequeño */
+.event-logo {
+  width: 200px;
+  height: auto;
+  display: block;
+  margin: 20px;
+}
+
+/* Si el logo no tiene clase, puedes usar el selector más específico según tu estructura:
+   Por ejemplo, si está dentro de .event-card, usa: */
+.event-card img {
+  width: 350px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+
+/* Color de letra #282828 cuando el fondo es var(--Background-events-2) */
+[style*="var(--Background-events-2)"] {
+  color: #282828 !important;
+}
+[style*="background: var(--Background-events-2)"] *,
+[style*="background: var(--Background-events-2)"] {
+  color: #282828 !important;
+}
+

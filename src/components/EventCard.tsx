@@ -42,7 +42,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
           borderRadius: '25px',
           background: 'var(--Background-events-2)',
           boxShadow: 'var(--shadow-drop)',
-          color: 'var(--White)',
+          color: 'var(--event-2)',
           fontFamily: 'var(--Heading-Font-Family)',
           minHeight: '225px',
           overflow: 'hidden' // Para que el borde redondeado afecte a la imagen
@@ -51,6 +51,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
         {/* Imagen del Evento */}
         <Box
           component='img'
+          className='event-logo'
           src={
             event.image_url ||
             '/cyberLogo-gigapixel-art-scale-2-00x-godpix-1@2x.png'
@@ -80,7 +81,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
             <Typography variant='h5' component='h3' fontWeight='bold' mb={1}>
               {event.title}
             </Typography>
-            <Typography variant='body2' color='var(--Gray-400)' sx={{ mb: 2 }}>
+            <Typography variant='body2' color='var(--Gray-700)' sx={{ mb: 2 }}>
               {event.short_desc}
             </Typography>
           </Box>
@@ -92,7 +93,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
               sx={{ display: 'flex', alignItems: 'center' }}
             >
               <CalendarTodayIcon
-                sx={{ mr: 1, color: 'var(--color-cadetblue)' }}
+                sx={{ mr: 1, color: 'var(--Logo-2)' }}
               />
               <Typography variant='body2'>
                 {formatDate(event.start_date)}
@@ -103,7 +104,9 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
               size={{ xs: 12, sm: 4 }}
               sx={{ display: 'flex', alignItems: 'center' }}
             >
-              <LocationOnIcon sx={{ mr: 1, color: 'var(--color-cadetblue)' }} />
+              <LocationOnIcon
+                sx={{ mr: 1, color: 'var(--Logo-2)' }}
+              />
               <Typography variant='body2'>
                 {/* --- LÍNEA CORREGIDA --- */}
                 {event.is_online
@@ -117,7 +120,9 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
               size={{ xs: 12, sm: 4 }}
               sx={{ display: 'flex', alignItems: 'center' }}
             >
-              <GroupIcon sx={{ mr: 1, color: 'var(--color-cadetblue)' }} />
+              <GroupIcon
+                sx={{ mr: 1, color: 'var(--Logo-2)' }}
+              />
               <Typography variant='body2'>
                 {event.current_attendees} asistentes
               </Typography>

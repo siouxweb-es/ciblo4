@@ -24,6 +24,7 @@ import PanelDeUsuario from './pages/PanelDeUsuario'
 import PanelDeOrganizador from './pages/PanelDeOrganizador'
 import Page from './pages/Page'
 import ErrorPage from './pages/ErrorPage'
+import TestFont from './pages/test-font'
 
 import {
   CssBaseline,
@@ -196,6 +197,10 @@ const routes: RouteObject[] = [
             }
           }
         ]
+      },
+      {
+        path: 'test-font',
+        element: <TestFont />
       }
     ]
   }
